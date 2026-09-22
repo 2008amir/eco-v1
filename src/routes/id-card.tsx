@@ -9,8 +9,11 @@ import { usePositions } from "@/lib/membership";
 import { usePolicyText } from "@/lib/org-policy";
 import { useStorageUrl } from "@/lib/storage-url";
 import { qrDataUrl, qrUrlFor, signatureInkDataUrl, toDataUrl, downloadFormPdf, downloadIdCardPdf } from "@/lib/member-card";
-import { Download, Loader2 } from "lucide-react";
+import { Download, Loader2, Printer } from "lucide-react";
 import { toast } from "sonner";
+import { Checkbox } from "@/components/ui/checkbox";
+import { PolicyView } from "@/components/PolicyView";
+import { MembershipPrintSheet } from "@/components/MembershipPrintSheet";
 import { MemberIdCard } from "@/components/MemberIdCard";
 import formTemplate from "@/assets/personal-information-form.pdf.asset.json";
 
@@ -37,6 +40,9 @@ function IdCardPage() {
   const [qr, setQr] = useState<string | null>(null);
   const [signature, setSignature] = useState<string | null>(null);
   const [busy, setBusy] = useState<"form" | "card" | null>(null);
+  const [stage, setStage] = useState<"policy" | "review">("policy");
+  const [accepted, setAccepted] = useState(false);
+  const verified = Boolean(profile?.registered_at && profile?.member_no);
   const avatarUrl = useStorageUrl("avatars", profile?.avatar_url ?? null);
 
   const memberNo = profile?.member_no ?? null;
