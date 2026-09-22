@@ -13,7 +13,7 @@ function RegisteredUsers() {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("id, first_name, last_name, username, phone, member_no, registered_at, is_revoked, positions(name)")
+        .select("id, first_name, last_name, username, phone, member_no, registered_at, is_revoked, positions:positions!profiles_position_id_fkey(name)")
         .not("registered_at", "is", null)
         .order("registered_at", { ascending: false });
       if (error) throw error;
