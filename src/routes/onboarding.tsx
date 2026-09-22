@@ -174,6 +174,9 @@ function Onboarding() {
             <MemberForm form={form} onChange={(k, v) => setForm((f) => ({ ...f, [k]: v }))}
               signature={signature} onSignatureChange={setSignature} email={user.email ?? ""}
               positionName={positionName} memberNo={memberNo} />
+            <p className="text-xs text-muted-foreground text-center">
+              All fields are required. Only Last name, Address line 2 and Address line 3 are optional.
+            </p>
             <Button onClick={saveForm} disabled={busy} className="w-full gradient-bg text-primary-foreground hover:opacity-90 glow">
               {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Save and continue
             </Button>
