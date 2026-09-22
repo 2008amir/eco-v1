@@ -31,7 +31,8 @@ export const getRouter = () => {
       queries: {
         staleTime: 120_000,
         gcTime: 10 * 60_000,
-        retry: 1,
+        retry: 3,
+        retryDelay: (attempt) => Math.min(400 * 2 ** attempt, 3000),
         refetchOnWindowFocus: false,
         refetchOnReconnect: false,
       },

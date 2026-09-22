@@ -138,12 +138,29 @@ function downloadBytes(bytes: Uint8Array, filename: string) {
   URL.revokeObjectURL(url);
 }
 
+/** Load the uploaded template, retrying a few times so a flaky first request never blocks the download. */
+async function fetchTemplateBytes(): Promise<ArrayBuffer> {
+  let lastError: unknown = null;
+  for (let attempt = 0; attempt < 4; attempt += 1) {
+    try {
+      const response = await fetch(formTemplate.url, { cache: attempt === 0 ? "default" : "reload" });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const bytes = await response.arrayBuffer();
+      if (bytes.byteLength > 0) return bytes;
+      throw new Error("empty template");
+    } catch (error) {
+      lastError = error;
+      await new Promise((resolve) => setTimeout(resolve, 350 * (attempt + 1)));
+    }
+  }
+  throw new Error(`The registration form could not be loaded. Please check your connection and try again. (${String((lastError as Error)?.message ?? lastError)})`);
+}
+
 /** Fill the uploaded three-page registration form without changing its artwork. */
 export async function downloadFormPdf({ profile, email, positionName, memberNo, qr, policy }: CardData) {
   const p = profile ?? {};
-  const response = await fetch(formTemplate.url);
-  if (!response.ok) throw new Error("The registration form template could not be loaded.");
-  const pdf = await PDFDocument.load(await response.arrayBuffer());
+  const templateBytes = await fetchTemplateBytes();
+  const pdf = await PDFDocument.load(templateBytes);
   const font = await pdf.embedFont(StandardFonts.Helvetica);
   const bold = await pdf.embedFont(StandardFonts.HelveticaBold);
   const qrImage = await pdf.embedPng(qr);
@@ -184,16 +201,24 @@ export async function downloadFormPdf({ profile, email, positionName, memberNo, 
 
   const page3 = pages[2];
   if (page3) {
-    page3.drawRectangle({ x: 210, y: 438, width: 180, height: 40, color: rgb(1, 1, 1) });
+    const pageW = page3.getWidth();
+    const pageH = page3.getHeight();
+    const margin = 72; // 1 inch on each side
+    const textWidth = pageW - margin * 2;
+    const startY = pageH - 90 - margin; // 1 inch below the printed header
+    const leading = 15;
+    // Cover the "Write the policy here" placeholder.
+    page3.drawRectangle({ x: margin - 4, y: pageH - 402, width: textWidth + 8, height: 24, color: rgb(1, 1, 1) });
     const words = (policy?.trim() || "No organizational policy has been published yet.").replace(/\s+/g, " ").split(" ");
     const lines: string[] = [];
     let line = "";
     for (const word of words) {
       const next = line ? `${line} ${word}` : word;
-      if (font.widthOfTextAtSize(next, 10) > 360) { lines.push(line); line = word; } else line = next;
+      if (font.widthOfTextAtSize(next, 10) > textWidth) { lines.push(line); line = word; } else line = next;
     }
     if (line) lines.push(line);
-    lines.slice(0, 28).forEach((text, index) => page3.drawText(text, { x: 118, y: 420 - index * 15, size: 10, font, color: ink }));
+    const maxLines = Math.floor((startY - margin) / leading);
+    lines.slice(0, maxLines).forEach((text, index) => page3.drawText(text, { x: margin, y: startY - index * leading, size: 10, font, color: ink }));
   }
 
   downloadBytes(await pdf.save(), `ecomedic-form-${memberNo ?? "member"}.pdf`);
