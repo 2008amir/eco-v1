@@ -170,16 +170,16 @@ export async function downloadFormPdf({ profile, email, positionName, memberNo, 
   write(0, email, 121, 455, 167, 8); write(0, p.gender, 348, 455, 170);
   write(0, p.country, 98, 587, 168); write(0, p.state, 339, 587, 169);
   write(0, p.city, 80, 635, 169); write(0, p.home_number, 351, 635, 167);
-  write(0, p.home_email, 146, 676, 370, 8);
+  write(0, p.home_email, 152, 676, 364, 8);
   write(0, p.address_line1, 122, 706, 394, 8); write(0, p.address_line2, 122, 729, 394, 8); write(0, p.address_line3, 122, 751, 394, 8);
 
   write(1, p.institution, 145, 119, 370, 9);
   write(1, p.program_of_study, 117, 153, 166, 8); write(1, p.course_of_study, 349, 153, 164, 8);
   write(1, p.is_graduate ? "Graduate" : p.school_level, 120, 183, 166, 8);
   write(1, p.is_graduate ? p.graduation_year : "Not graduated", 454, 183, 59, 8);
-  write(1, p.guardian_name, 104, 350, 412); write(1, p.guardian_phone, 113, 372, 403);
-  write(1, p.guardian_address, 113, 395, 403, 8); write(1, p.guardian_relationship, 132, 417, 384);
-  write(1, p.emergency_name, 106, 538, 410); write(1, p.emergency_phone, 113, 561, 403);
+  write(1, p.guardian_name, 104, 350, 412); write(1, p.guardian_phone, 122, 372, 394);
+  write(1, p.guardian_address, 118, 395, 398, 8); write(1, p.guardian_relationship, 132, 417, 384);
+  write(1, p.emergency_name, 106, 538, 410); write(1, p.emergency_phone, 122, 561, 394);
   write(1, p.emergency_relationship, 134, 583, 382);
 
   const page3 = pages[2];
