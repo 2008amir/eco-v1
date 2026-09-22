@@ -76,16 +76,19 @@ export function SignaturePad({ value, onChange }: Props) {
 
   return (
     <div className="space-y-2">
-      <canvas
-        ref={canvasRef}
-        width={600}
-        height={200}
-        onPointerDown={start}
-        onPointerMove={move}
-        onPointerUp={end}
-        onPointerLeave={end}
-        className="w-full h-40 rounded-lg border border-border bg-white touch-none cursor-crosshair"
-      />
+      <div className="relative h-40 overflow-hidden rounded-lg border border-border bg-white">
+        <div className="pointer-events-none absolute inset-x-[5%] top-2/3 border-t border-dashed border-muted-foreground/50" />
+        <canvas
+          ref={canvasRef}
+          width={600}
+          height={200}
+          onPointerDown={start}
+          onPointerMove={move}
+          onPointerUp={end}
+          onPointerLeave={end}
+          className="relative h-full w-full touch-none cursor-crosshair"
+        />
+      </div>
       <div className="flex items-center justify-between">
         <p className="text-xs text-muted-foreground">{hasInk ? "Signature captured" : "Draw your signature above"}</p>
         <Button type="button" variant="outline" size="sm" onClick={clear}>

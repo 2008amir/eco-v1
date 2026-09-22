@@ -43,7 +43,7 @@ function IdCardPage() {
   const positionName = positions.find((p) => p.id === profile?.position_id)?.name ?? "Member";
   const fullName = profile?.id_full_name || [profile?.first_name, profile?.middle_name, profile?.last_name].filter(Boolean).join(" ");
   const issued = profile?.registered_at
-    ? new Date(profile.registered_at).toLocaleDateString(undefined, { month: "2-digit", year: "numeric" })
+    ? new Date(profile.registered_at).toLocaleDateString("en-GB")
     : "—";
 
   useEffect(() => { qrDataUrl(memberNo).then(setQr).catch(() => setQr(null)); }, [memberNo]);
