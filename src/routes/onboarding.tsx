@@ -121,8 +121,8 @@ function Onboarding() {
   useEffect(() => { setAccepted(false); }, [step]);
 
   useEffect(() => {
-    if (profile && (step >= 6 || registrationVerified)) navigate({ to: "/" });
-  }, [step, profile, navigate]);
+    if (profile && step >= 6 && registrationVerified) navigate({ to: "/" });
+  }, [step, profile, registrationVerified, navigate]);
 
   // Admins never fill the registration form — send them straight to the dashboard.
   useEffect(() => {
@@ -156,7 +156,7 @@ function Onboarding() {
     setBusy(false);
   };
 
-  if (!user || registrationVerified) return null;
+  if (!user || (step >= 6 && registrationVerified)) return null;
 
   const positionName = positions.find((p) => p.id === (profile as any)?.position_id)?.name ?? "Member";
   const memberNo = (profile as any)?.member_no ?? null;
