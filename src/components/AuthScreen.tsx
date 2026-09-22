@@ -239,7 +239,7 @@ function SignUpForm({ onPendingChange: _onPendingChange }: { onPendingChange: (v
       </div>
       <div className="space-y-2">
         <Label htmlFor="password">Password</Label>
-        <PasswordInput id="password" value={form.password} onChange={set("password")} className="glass" autoComplete="new-password" />
+        <PasswordInput id="password" value={form.password} onChange={set("password")} className="glass" autoComplete="new-password" showStrength />
         {errors.password && <p className="text-xs text-destructive">{errors.password}</p>}
       </div>
       <div className="space-y-2">
