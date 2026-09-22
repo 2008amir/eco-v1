@@ -120,7 +120,8 @@ function Onboarding() {
   useEffect(() => { setAccepted(false); }, [step]);
 
   useEffect(() => {
-    if (profile && step >= 6) navigate({ to: "/" });
+    const registrationVerified = Boolean(profile?.registered_at && profile?.member_no);
+    if (profile && (step >= 6 || registrationVerified)) navigate({ to: "/" });
   }, [step, profile, navigate]);
 
   // Admins never fill the registration form — send them straight to the dashboard.
