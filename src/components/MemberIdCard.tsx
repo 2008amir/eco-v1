@@ -41,10 +41,10 @@ export function MemberIdCard(props: MemberIdCardProps) {
     >
       <div className="member-card-details">
         <dl>
-          <div><dd>{props.fullName || "—"}</dd></div>
-          <div><dd>{props.positionName || "—"}</dd></div>
-          <div><dd>{props.bloodGroup || "—"}</dd></div>
-          <div><dd>{props.phone || "—"}</dd></div>
+          <div className="member-card-name"><dd>{props.fullName || "—"}</dd></div>
+          <div className="member-card-position"><dd>{props.positionName || "—"}</dd></div>
+          <div className="member-card-blood"><dd>{props.bloodGroup || "—"}</dd></div>
+          <div className="member-card-phone"><dd>{props.phone || "—"}</dd></div>
         </dl>
       </div>
 
