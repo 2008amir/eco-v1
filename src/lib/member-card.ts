@@ -201,16 +201,24 @@ export async function downloadFormPdf({ profile, email, positionName, memberNo, 
 
   const page3 = pages[2];
   if (page3) {
-    page3.drawRectangle({ x: 210, y: 438, width: 180, height: 40, color: rgb(1, 1, 1) });
+    const pageW = page3.getWidth();
+    const pageH = page3.getHeight();
+    const margin = 72; // 1 inch on each side
+    const textWidth = pageW - margin * 2;
+    const startY = pageH - 90 - margin; // 1 inch below the printed header
+    const leading = 15;
+    // Cover the "Write the policy here" placeholder.
+    page3.drawRectangle({ x: margin - 4, y: pageH - 402, width: textWidth + 8, height: 24, color: rgb(1, 1, 1) });
     const words = (policy?.trim() || "No organizational policy has been published yet.").replace(/\s+/g, " ").split(" ");
     const lines: string[] = [];
     let line = "";
     for (const word of words) {
       const next = line ? `${line} ${word}` : word;
-      if (font.widthOfTextAtSize(next, 10) > 360) { lines.push(line); line = word; } else line = next;
+      if (font.widthOfTextAtSize(next, 10) > textWidth) { lines.push(line); line = word; } else line = next;
     }
     if (line) lines.push(line);
-    lines.slice(0, 28).forEach((text, index) => page3.drawText(text, { x: 118, y: 420 - index * 15, size: 10, font, color: ink }));
+    const maxLines = Math.floor((startY - margin) / leading);
+    lines.slice(0, maxLines).forEach((text, index) => page3.drawText(text, { x: margin, y: startY - index * leading, size: 10, font, color: ink }));
   }
 
   downloadBytes(await pdf.save(), `ecomedic-form-${memberNo ?? "member"}.pdf`);
