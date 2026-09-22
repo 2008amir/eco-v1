@@ -22,6 +22,13 @@
       "when": 1790041290964,
       "tag": "0002_rebuild_positions_payments",
       "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1790041329623,
+      "tag": "0003_rebuild_receipts_policies_membercard",
+      "breakpoints": true
     }
   ]
 }

@@ -400,6 +400,27 @@ export type Database = {
         }
         Relationships: []
       }
+      org_policies: {
+        Row: {
+          content: string
+          created_at: string
+          key: string
+          updated_at: string
+        }
+        Insert: {
+          content?: string
+          created_at?: string
+          key: string
+          updated_at?: string
+        }
+        Update: {
+          content?: string
+          created_at?: string
+          key?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       payment_accounts: {
         Row: {
           account_name: string
@@ -553,6 +574,7 @@ export type Database = {
           member_no: string | null
           middle_name: string | null
           onboarding_step: number
+          pending_position_id: string | null
           phone: string | null
           policy_accepted_at: string | null
           position_id: string | null
@@ -598,6 +620,7 @@ export type Database = {
           member_no?: string | null
           middle_name?: string | null
           onboarding_step?: number
+          pending_position_id?: string | null
           phone?: string | null
           policy_accepted_at?: string | null
           position_id?: string | null
@@ -643,6 +666,7 @@ export type Database = {
           member_no?: string | null
           middle_name?: string | null
           onboarding_step?: number
+          pending_position_id?: string | null
           phone?: string | null
           policy_accepted_at?: string | null
           position_id?: string | null
@@ -656,6 +680,13 @@ export type Database = {
           username?: string
         }
         Relationships: [
+          {
+            foreignKeyName: "profiles_pending_position_id_fkey"
+            columns: ["pending_position_id"]
+            isOneToOne: false
+            referencedRelation: "positions"
+            referencedColumns: ["id"]
+          },
           {
             foreignKeyName: "profiles_position_id_fkey"
             columns: ["position_id"]
@@ -807,6 +838,7 @@ export type Database = {
       }
       is_username_available: { Args: { _username: string }; Returns: boolean }
       join_general_community: { Args: { _user_id: string }; Returns: undefined }
+      public_member_card: { Args: { _member_no: string }; Returns: Json }
       record_my_activity: { Args: never; Returns: undefined }
       set_community_general: {
         Args: { _community_id: string; _general: boolean }
