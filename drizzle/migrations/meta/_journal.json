@@ -1,0 +1,34 @@
+{
+  "version": "7",
+  "dialect": "postgresql",
+  "entries": [
+    {
+      "idx": 0,
+      "version": "7",
+      "when": 1790041172586,
+      "tag": "0000_rebuild_core_schema",
+      "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1790041229875,
+      "tag": "0001_rebuild_communities_projects",
+      "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1790041290964,
+      "tag": "0002_rebuild_positions_payments",
+      "breakpoints": true
+    },
+    {
+      "idx": 3,
+      "version": "7",
+      "when": 1790041329623,
+      "tag": "0003_rebuild_receipts_policies_membercard",
+      "breakpoints": true
+    }
+  ]
+}

@@ -1,8 +1,17 @@
+CREATE POLICY "Community images read" ON storage.objects FOR SELECT TO authenticated USING (bucket_id = 'community-images');
+CREATE POLICY "Community images upload" ON storage.objects FOR INSERT TO authenticated
+  WITH CHECK (bucket_id = 'community-images' AND auth.uid()::text = (storage.foldername(name))[1]);
+CREATE POLICY "Community images update" ON storage.objects FOR UPDATE TO authenticated
+  USING (bucket_id = 'community-images' AND auth.uid()::text = (storage.foldername(name))[1]);
+CREATE POLICY "Community images delete" ON storage.objects FOR DELETE TO authenticated
+  USING (bucket_id = 'community-images' AND auth.uid()::text = (storage.foldername(name))[1]);
 
--- 1. remove seeded demo communities
-DELETE FROM public.communities WHERE created_by IS NULL;
+CREATE POLICY "Community files read" ON storage.objects FOR SELECT TO authenticated USING (bucket_id = 'community-files');
+CREATE POLICY "Community files upload" ON storage.objects FOR INSERT TO authenticated
+  WITH CHECK (bucket_id = 'community-files' AND auth.uid()::text = (storage.foldername(name))[1]);
+CREATE POLICY "Community files delete" ON storage.objects FOR DELETE TO authenticated
+  USING (bucket_id = 'community-files' AND auth.uid()::text = (storage.foldername(name))[1]);
 
--- 2. general community
 ALTER TABLE public.communities ADD COLUMN IF NOT EXISTS is_general BOOLEAN NOT NULL DEFAULT false;
 CREATE UNIQUE INDEX IF NOT EXISTS communities_one_general ON public.communities (is_general) WHERE is_general;
 
@@ -12,7 +21,6 @@ SELECT 'General Group',
        'public', 'Global', true, substr(md5(random()::text), 1, 8)
 WHERE NOT EXISTS (SELECT 1 FROM public.communities WHERE is_general);
 
--- everyone in, site admins as community admins
 CREATE OR REPLACE FUNCTION public.join_general_community(_user_id uuid)
 RETURNS void
 LANGUAGE plpgsql
@@ -28,7 +36,6 @@ BEGIN
   ON CONFLICT (community_id, user_id) DO NOTHING;
 END;
 $$;
-REVOKE ALL ON FUNCTION public.join_general_community(uuid) FROM PUBLIC, anon;
 
 CREATE OR REPLACE FUNCTION public.tg_profile_join_general()
 RETURNS TRIGGER LANGUAGE plpgsql SECURITY DEFINER SET search_path = public AS $$
@@ -52,16 +59,10 @@ DROP TRIGGER IF EXISTS user_roles_general_admin ON public.user_roles;
 CREATE TRIGGER user_roles_general_admin AFTER INSERT ON public.user_roles
 FOR EACH ROW EXECUTE FUNCTION public.tg_role_general_admin();
 
--- backfill existing users
-DO $$
-DECLARE r RECORD;
-BEGIN
-  FOR r IN SELECT id FROM public.profiles LOOP
-    PERFORM public.join_general_community(r.id);
-  END LOOP;
-END $$;
+REVOKE ALL ON FUNCTION public.join_general_community(uuid) FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.tg_profile_join_general() FROM PUBLIC, anon, authenticated;
+REVOKE ALL ON FUNCTION public.tg_role_general_admin() FROM PUBLIC, anon, authenticated;
 
--- 3. projects
 CREATE TABLE IF NOT EXISTS public.community_projects (
   id UUID PRIMARY KEY DEFAULT gen_random_uuid(),
   community_id UUID NOT NULL REFERENCES public.communities(id) ON DELETE CASCADE,
@@ -121,3 +122,63 @@ USING (author_id = auth.uid() OR public.has_role(auth.uid(), 'admin'));
 CREATE POLICY "Admins delete reviews" ON public.community_project_reviews
 FOR DELETE TO authenticated
 USING (author_id = auth.uid() OR public.has_role(auth.uid(), 'admin'));
+
+CREATE OR REPLACE FUNCTION public.get_admin_ids()
+RETURNS uuid[]
+LANGUAGE sql
+STABLE SECURITY DEFINER
+SET search_path TO 'public'
+AS $$
+  SELECT coalesce(array_agg(DISTINCT user_id), '{}'::uuid[]) FROM public.user_roles WHERE role = 'admin'::public.app_role;
+$$;
+REVOKE ALL ON FUNCTION public.get_admin_ids() FROM public, anon;
+GRANT EXECUTE ON FUNCTION public.get_admin_ids() TO authenticated, service_role;
+
+ALTER TABLE public.communities
+  ADD COLUMN IF NOT EXISTS members_can_post boolean NOT NULL DEFAULT true;
+
+DROP POLICY IF EXISTS "Members can send community messages" ON public.community_messages;
+DROP POLICY IF EXISTS "Members send messages" ON public.community_messages;
+
+CREATE POLICY "Allowed members can send community messages"
+ON public.community_messages
+FOR INSERT
+TO authenticated
+WITH CHECK (
+  sender_id = auth.uid()
+  AND public.is_community_member(community_id, auth.uid())
+  AND (
+    public.is_community_admin(community_id, auth.uid())
+    OR EXISTS (SELECT 1 FROM public.communities c WHERE c.id = community_id AND c.members_can_post)
+  )
+);
+
+CREATE OR REPLACE FUNCTION public.is_community_owner(_community_id uuid, _user_id uuid)
+RETURNS boolean LANGUAGE sql STABLE SECURITY DEFINER SET search_path = public AS $$
+  SELECT EXISTS (
+    SELECT 1 FROM public.communities c
+    WHERE c.id = _community_id
+      AND (c.created_by = _user_id OR (c.created_by IS NULL AND public.has_role(_user_id, 'admin'::public.app_role)))
+  );
+$$;
+
+DROP POLICY IF EXISTS "Community admins update roles" ON public.community_members;
+CREATE POLICY "Community owner updates roles" ON public.community_members
+FOR UPDATE TO authenticated
+USING (public.is_community_owner(community_id, auth.uid()))
+WITH CHECK (public.is_community_owner(community_id, auth.uid()));
+
+DO $$
+BEGIN
+  BEGIN ALTER PUBLICATION supabase_realtime ADD TABLE public.community_members; EXCEPTION WHEN duplicate_object THEN NULL; END;
+  BEGIN ALTER PUBLICATION supabase_realtime ADD TABLE public.communities; EXCEPTION WHEN duplicate_object THEN NULL; END;
+  BEGIN ALTER PUBLICATION supabase_realtime ADD TABLE public.community_projects; EXCEPTION WHEN duplicate_object THEN NULL; END;
+  BEGIN ALTER PUBLICATION supabase_realtime ADD TABLE public.community_join_requests; EXCEPTION WHEN duplicate_object THEN NULL; END;
+END $$;
+
+ALTER TABLE public.community_members REPLICA IDENTITY FULL;
+ALTER TABLE public.communities REPLICA IDENTITY FULL;
+ALTER TABLE public.community_projects REPLICA IDENTITY FULL;
+ALTER TABLE public.community_join_requests REPLICA IDENTITY FULL;
+
+NOTIFY pgrst, 'reload schema';
