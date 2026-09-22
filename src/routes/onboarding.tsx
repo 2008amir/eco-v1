@@ -141,7 +141,11 @@ function Onboarding() {
 
   const saveForm = async () => {
     if (!user) return;
-    if (!form.first_name || !form.last_name || !form.phone) { toast.error("First name, last name and phone number are required"); return; }
+    const missing = validateOnboardingForm(form, signature);
+    if (missing.length > 0) {
+      toast.error(`Please fill in: ${missing.join(", ")}`);
+      return;
+    }
     setBusy(true);
     const { error } = await withSupabaseRetry(() =>
       supabase.from("profiles").update({ ...buildProfilePayload(form, signature), onboarding_step: 1 } as never).eq("id", user.id),
