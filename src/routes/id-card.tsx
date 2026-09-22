@@ -8,7 +8,7 @@ import { useAuth } from "@/lib/auth-context";
 import { usePositions } from "@/lib/membership";
 import { usePolicyText } from "@/lib/org-policy";
 import { useStorageUrl } from "@/lib/storage-url";
-import { qrDataUrl, qrUrlFor, signatureInkDataUrl, toDataUrl, downloadFormPdf, downloadIdCardPdf } from "@/lib/member-card";
+import { qrDataUrl, qrUrlFor, signatureInkDataUrl, toDataUrl, downloadFormPdf, downloadIdCardPdf, buildFormPdfBytes } from "@/lib/member-card";
 import { Download, Loader2, Printer } from "lucide-react";
 import { toast } from "sonner";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -42,6 +42,7 @@ function IdCardPage() {
   const [busy, setBusy] = useState<"form" | "card" | null>(null);
   const [stage, setStage] = useState<"policy" | "review">("policy");
   const [accepted, setAccepted] = useState(false);
+  const [previewUrl, setPreviewUrl] = useState<string | null>(null);
   const verified = Boolean(profile?.registered_at && profile?.member_no);
   const avatarUrl = useStorageUrl("avatars", profile?.avatar_url ?? null);
 
@@ -58,6 +59,27 @@ function IdCardPage() {
   }, [profile?.signature_data]);
 
   const base = { profile: (profile ?? null) as Record<string, any> | null, email: user?.email ?? "", positionName, memberNo };
+
+  // Build the filled form as a previewable PDF when the review stage opens.
+  useEffect(() => {
+    if (!(verified && stage === "review" && qr)) { setPreviewUrl((u) => { if (u) URL.revokeObjectURL(u); return null; }); return; }
+    let cancelled = false;
+    buildFormPdfBytes({ ...base, qr, policy: formPolicy ?? "" })
+      .then((bytes) => {
+        if (cancelled) return;
+        const url = URL.createObjectURL(new Blob([bytes as BlobPart], { type: "application/pdf" }));
+        setPreviewUrl((old) => { if (old) URL.revokeObjectURL(old); return url; });
+      })
+      .catch((e) => toast.error((e as Error).message));
+    return () => { cancelled = true; };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [verified, stage, qr, formPolicy, memberNo]);
+
+  const onPrint = () => {
+    if (!previewUrl) { toast.error("The form preview is still loading — try again in a moment."); return; }
+    const win = window.open(previewUrl, "_blank");
+    if (!win) toast.error("Your browser blocked the print window. Please allow pop-ups for this site.");
+  };
 
   const onForm = async () => {
     if (!qr) return;
@@ -152,11 +174,15 @@ function IdCardPage() {
               {verified && stage === "review" && (
                 <>
                   <p className="text-sm text-muted-foreground">Check your details below, then print or download your completed form.</p>
-                  <div className="rounded-2xl overflow-hidden border border-border">
-                    <MembershipPrintSheet profile={profile as any} email={user?.email ?? ""} positionName={positionName} memberNo={memberNo} />
-                  </div>
+                  {previewUrl ? (
+                    <iframe className="member-form-preview" src={`${previewUrl}#toolbar=0&navpanes=0`} title="Completed registration form preview" />
+                  ) : (
+                    <div className="member-form-preview flex items-center justify-center text-sm text-muted-foreground">
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />Preparing your completed form…
+                    </div>
+                  )}
                   <div className="flex flex-wrap gap-3">
-                    <Button variant="outline" onClick={() => window.print()}><Printer className="mr-2 h-4 w-4" />Print</Button>
+                    <Button variant="outline" onClick={onPrint} disabled={!previewUrl}><Printer className="mr-2 h-4 w-4" />Print</Button>
                     <Button onClick={onForm} disabled={!qr || busy !== null} className="gradient-bg text-primary-foreground hover:opacity-90">
                       {busy === "form" ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}Download form
                     </Button>
