@@ -220,13 +220,13 @@ export async function downloadIdCardPdf({ profile, positionName, memberNo, qr, a
   const details: Array<[string, number, number]> = [
     [fullName || "—", 13.9, 21.4],
     [positionName || "—", 19.1, 26.0],
-    [p.blood_group || "—", 25.1, 30.7],
-    [p.id_phone || p.phone || "—", 19.7, 35.3],
+    [p.blood_group || "—", 25.2, 30.9],
+    [p.id_phone || p.phone || "—", 19.8, 35.5],
   ];
   details.forEach(([value, x, y]) => {
     doc.setTextColor(8, 15, 13); doc.setFont("helvetica", "bold"); doc.setFontSize(8.7); doc.text(String(value).slice(0, 30), x, y, { maxWidth: 40 });
   });
-  doc.setFont("helvetica", "bold"); doc.setFontSize(6.3); doc.text(String(memberNo || "—").slice(0, 14), 68.0, 35.4, { maxWidth: 16.3 });
+  doc.setFont("helvetica", "bold"); doc.setFontSize(6.3); doc.text(String(memberNo || "—").slice(0, 14), 68.1, 35.5, { maxWidth: 16.2 });
   doc.addImage(qr, "PNG", 5.0, 39.0, 11.2, 11.2);
   doc.setTextColor(8, 15, 13); doc.setFont("helvetica", "bold"); doc.setFontSize(4.8);
   doc.text("SCAN FOR", 18.1, 43.6); doc.text("VERIFICATION", 18.1, 47.3);
