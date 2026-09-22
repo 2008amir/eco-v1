@@ -23,7 +23,7 @@ function useRankedUsers(memberOnly: boolean) {
     queryFn: async () => {
       const { data, error } = await supabase
         .from("profiles")
-        .select("*, positions(id, name, description, is_member)")
+        .select("*, positions:positions!profiles_position_id_fkey(id, name, description, is_member)")
         .order("created_at", { ascending: false });
       if (error) throw error;
       const rows = (data ?? []) as unknown as Row[];
