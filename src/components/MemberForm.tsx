@@ -97,7 +97,7 @@ export function MemberForm({ form, onChange, signature, onSignatureChange, email
     <>
       <Section index={1} title="Personal information">
         <Field label="First name"><Input value={form.first_name} onChange={(e) => onChange("first_name", e.target.value)} className="glass" /></Field>
-        <Field label="Last name"><Input value={form.last_name} onChange={(e) => onChange("last_name", e.target.value)} className="glass" /></Field>
+        <Field label="Last name (optional)"><Input value={form.last_name} onChange={(e) => onChange("last_name", e.target.value)} className="glass" /></Field>
         <Field label="Middle name"><Input value={form.middle_name} onChange={(e) => onChange("middle_name", e.target.value)} className="glass" /></Field>
         <Field label="Phone number"><Input value={form.phone} onChange={(e) => onChange("phone", e.target.value)} className="glass" /></Field>
         <Field label="Gender">
@@ -116,8 +116,8 @@ export function MemberForm({ form, onChange, signature, onSignatureChange, email
         <Field label="State"><Input value={form.state} onChange={(e) => onChange("state", e.target.value)} className="glass" /></Field>
         <Field label="Country" full><CountrySelect value={form.country} onChange={(v) => onChange("country", v)} /></Field>
         <Field label="Address line 1" full><Input value={form.address_line1} onChange={(e) => onChange("address_line1", e.target.value)} className="glass" /></Field>
-        <Field label="Address line 2" full><Input value={form.address_line2} onChange={(e) => onChange("address_line2", e.target.value)} className="glass" /></Field>
-        <Field label="Address line 3" full><Input value={form.address_line3} onChange={(e) => onChange("address_line3", e.target.value)} className="glass" /></Field>
+        <Field label="Address line 2 (optional)" full><Input value={form.address_line2} onChange={(e) => onChange("address_line2", e.target.value)} className="glass" /></Field>
+        <Field label="Address line 3 (optional)" full><Input value={form.address_line3} onChange={(e) => onChange("address_line3", e.target.value)} className="glass" /></Field>
         <Field label="Home number"><Input value={form.home_number} onChange={(e) => onChange("home_number", e.target.value)} className="glass" /></Field>
         <Field label="Home email"><Input type="email" value={form.home_email} onChange={(e) => onChange("home_email", e.target.value)} className="glass" /></Field>
       </Section>

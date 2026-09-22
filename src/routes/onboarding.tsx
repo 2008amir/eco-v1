@@ -10,6 +10,54 @@ import { useAuth } from "@/lib/auth-context";
 import { supabase } from "@/integrations/supabase/client";
 import { withSupabaseRetry } from "@/lib/supabase-retry";
 import { MemberForm, EMPTY_MEMBER_FORM, buildProfilePayload, type FormState } from "@/components/MemberForm";
+
+const FIELD_LABELS: Record<string, string> = {
+  first_name: "First name",
+  middle_name: "Middle name",
+  username: "Username",
+  phone: "Phone number",
+  gender: "Gender",
+  date_of_birth: "Date of birth",
+  city: "City",
+  state: "State",
+  country: "Country",
+  address_line1: "Address line 1",
+  home_number: "Home number",
+  home_email: "Home email",
+  institution: "Institution",
+  course_of_study: "Course of study",
+  program_of_study: "Program of study",
+  is_graduate: "Graduated?",
+  graduation_year: "Year of graduation",
+  school_level: "Level in school",
+  guardian_name: "Parent/guardian name",
+  guardian_phone: "Parent/guardian phone",
+  guardian_address: "Parent/guardian address",
+  guardian_relationship: "Parent/guardian relationship",
+  emergency_name: "Emergency contact name",
+  emergency_relationship: "Emergency contact relationship",
+  emergency_phone: "Emergency contact phone",
+  id_full_name: "ID card full name",
+  blood_group: "Blood group",
+  id_phone: "ID card phone",
+  signature: "Signature",
+};
+
+function validateOnboardingForm(form: FormState, signature: string | null): string[] {
+  const optional = new Set(["last_name", "address_line2", "address_line3", "avatar_url", "graduation_year", "school_level"]);
+  const missing: string[] = [];
+  for (const key of Object.keys(EMPTY_MEMBER_FORM)) {
+    if (optional.has(key)) continue;
+    const value = form[key];
+    if (value === undefined || value === null || String(value).trim() === "") {
+      missing.push(FIELD_LABELS[key] ?? key);
+    }
+  }
+  if (form.is_graduate === "yes" && !form.graduation_year.trim()) missing.push(FIELD_LABELS.graduation_year);
+  if (form.is_graduate === "no" && !form.school_level.trim()) missing.push(FIELD_LABELS.school_level);
+  if (!signature) missing.push(FIELD_LABELS.signature);
+  return missing;
+}
 import { PolicyView } from "@/components/PolicyView";
 import { PaymentStep } from "@/components/PaymentStep";
 import { MembershipPrintSheet } from "@/components/MembershipPrintSheet";
@@ -93,7 +141,11 @@ function Onboarding() {
 
   const saveForm = async () => {
     if (!user) return;
-    if (!form.first_name || !form.last_name || !form.phone) { toast.error("First name, last name and phone number are required"); return; }
+    const missing = validateOnboardingForm(form, signature);
+    if (missing.length > 0) {
+      toast.error(`Please fill in: ${missing.join(", ")}`);
+      return;
+    }
     setBusy(true);
     const { error } = await withSupabaseRetry(() =>
       supabase.from("profiles").update({ ...buildProfilePayload(form, signature), onboarding_step: 1 } as never).eq("id", user.id),
@@ -122,6 +174,9 @@ function Onboarding() {
             <MemberForm form={form} onChange={(k, v) => setForm((f) => ({ ...f, [k]: v }))}
               signature={signature} onSignatureChange={setSignature} email={user.email ?? ""}
               positionName={positionName} memberNo={memberNo} />
+            <p className="text-xs text-muted-foreground text-center">
+              All fields are required. Only Last name, Address line 2 and Address line 3 are optional.
+            </p>
             <Button onClick={saveForm} disabled={busy} className="w-full gradient-bg text-primary-foreground hover:opacity-90 glow">
               {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}Save and continue
             </Button>
