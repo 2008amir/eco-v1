@@ -4,8 +4,26 @@ import { supabase } from "@/integrations/supabase/client";
 import { Button } from "@/components/ui/button";
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/components/ui/dialog";
 import { toast } from "sonner";
-import { StorageImage } from "@/components/StorageImage";
+import { useStorageUrl } from "@/lib/storage-url";
 import { formatAmount, usePendingPayments, type PendingPayment } from "@/lib/membership";
+
+function ReceiptView({ path }: { path: string }) {
+  const url = useStorageUrl("receipts", path);
+  const isPdf = /\.pdf($|\?)/i.test(path);
+
+  if (!url) return <div className="w-full h-64 rounded-lg border border-border bg-muted/30 animate-pulse" />;
+
+  return (
+    <div className="space-y-2">
+      {isPdf ? (
+        <iframe src={`${url}#toolbar=0`} title="Payment receipt" className="w-full h-80 rounded-lg border border-border bg-muted/30" />
+      ) : (
+        <img src={url} alt="Payment receipt" className="w-full max-h-80 object-contain rounded-lg border border-border bg-muted/30" />
+      )}
+      <a href={url} target="_blank" rel="noreferrer" className="text-xs text-primary underline">Open the uploaded file in a new tab</a>
+    </div>
+  );
+}
 
 export function AwaitingVerification({ kind }: { kind: "registration" | "monthly" | "position" }) {
   const { data: rows = [], isLoading } = usePendingPayments(kind);
@@ -47,7 +65,7 @@ export function AwaitingVerification({ kind }: { kind: "registration" | "monthly
           {open && (
             <div className="space-y-4">
               {open.receipt_url
-                ? <StorageImage bucket="receipts" path={open.receipt_url} alt="Payment receipt" className="w-full max-h-80 object-contain rounded-lg border border-border bg-muted/30" />
+                ? <ReceiptView path={open.receipt_url} />
                 : <p className="text-sm text-muted-foreground">No receipt uploaded.</p>}
               <div className="grid grid-cols-2 gap-3 text-sm">
                 <div><div className="text-muted-foreground text-xs">Name</div>{[open.first_name, open.last_name].filter(Boolean).join(" ") || "—"}</div>

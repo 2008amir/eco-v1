@@ -9,8 +9,11 @@ import { usePositions } from "@/lib/membership";
 import { usePolicyText } from "@/lib/org-policy";
 import { useStorageUrl } from "@/lib/storage-url";
 import { qrDataUrl, qrUrlFor, signatureInkDataUrl, toDataUrl, downloadFormPdf, downloadIdCardPdf } from "@/lib/member-card";
-import { Download, Loader2 } from "lucide-react";
+import { Download, Loader2, Printer } from "lucide-react";
 import { toast } from "sonner";
+import { Checkbox } from "@/components/ui/checkbox";
+import { PolicyView } from "@/components/PolicyView";
+import { MembershipPrintSheet } from "@/components/MembershipPrintSheet";
 import { MemberIdCard } from "@/components/MemberIdCard";
 import formTemplate from "@/assets/personal-information-form.pdf.asset.json";
 
@@ -37,6 +40,9 @@ function IdCardPage() {
   const [qr, setQr] = useState<string | null>(null);
   const [signature, setSignature] = useState<string | null>(null);
   const [busy, setBusy] = useState<"form" | "card" | null>(null);
+  const [stage, setStage] = useState<"policy" | "review">("policy");
+  const [accepted, setAccepted] = useState(false);
+  const verified = Boolean(profile?.registered_at && profile?.member_no);
   const avatarUrl = useStorageUrl("avatars", profile?.avatar_url ?? null);
 
   const memberNo = profile?.member_no ?? null;
@@ -122,11 +128,42 @@ function IdCardPage() {
                 <div className="text-lg font-bold">Ecomedic Squad — Official member registration form</div>
                 <div className="text-sm text-muted-foreground">Form no: {memberNo ?? "—"}</div>
               </div>
-              <iframe className="member-form-preview" src={`${formTemplate.url}#toolbar=0&navpanes=0`} title="Official member registration form" />
 
-              <Button onClick={onForm} disabled={!qr || busy !== null} className="gradient-bg text-primary-foreground hover:opacity-90">
-                {busy === "form" ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}Download form
-              </Button>
+              {!verified && (
+                <>
+                  <iframe className="member-form-preview" src={`${formTemplate.url}#toolbar=0&navpanes=0`} title="Official member registration form" />
+                  <Button onClick={onForm} disabled={!qr || busy !== null} className="gradient-bg text-primary-foreground hover:opacity-90">
+                    {busy === "form" ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}Download form
+                  </Button>
+                </>
+              )}
+
+              {verified && stage === "policy" && (
+                <>
+                  <PolicyView />
+                  <label className="flex items-center gap-3 text-sm">
+                    <Checkbox checked={accepted} onCheckedChange={(v) => setAccepted(v === true)} />
+                    I have read and accept the organization policy
+                  </label>
+                  <Button disabled={!accepted} onClick={() => setStage("review")} className="gradient-bg text-primary-foreground hover:opacity-90">Next</Button>
+                </>
+              )}
+
+              {verified && stage === "review" && (
+                <>
+                  <p className="text-sm text-muted-foreground">Check your details below, then print or download your completed form.</p>
+                  <div className="rounded-2xl overflow-hidden border border-border">
+                    <MembershipPrintSheet profile={profile as any} email={user?.email ?? ""} positionName={positionName} memberNo={memberNo} />
+                  </div>
+                  <div className="flex flex-wrap gap-3">
+                    <Button variant="outline" onClick={() => window.print()}><Printer className="mr-2 h-4 w-4" />Print</Button>
+                    <Button onClick={onForm} disabled={!qr || busy !== null} className="gradient-bg text-primary-foreground hover:opacity-90">
+                      {busy === "form" ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}Download form
+                    </Button>
+                    <Button variant="ghost" onClick={() => { setAccepted(false); setStage("policy"); }}>Back to policy</Button>
+                  </div>
+                </>
+              )}
             </div>
           </TabsContent>
         </Tabs>
