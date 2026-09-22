@@ -220,19 +220,19 @@ export async function downloadIdCardPdf({ profile, positionName, memberNo, qr, a
   const details: Array<[string, number, number]> = [
     [fullName || "—", 13.9, 21.4],
     [positionName || "—", 19.1, 26.0],
-    [p.blood_group || "—", 25.7, 30.7],
-    [p.id_phone || p.phone || "—", 20.3, 35.3],
+    [p.blood_group || "—", 25.1, 30.7],
+    [p.id_phone || p.phone || "—", 19.7, 35.3],
   ];
   details.forEach(([value, x, y]) => {
     doc.setTextColor(8, 15, 13); doc.setFont("helvetica", "bold"); doc.setFontSize(8.7); doc.text(String(value).slice(0, 30), x, y, { maxWidth: 40 });
   });
-  doc.setFont("helvetica", "bold"); doc.setFontSize(7.8); doc.text(String(memberNo || "—").slice(0, 17), 68.6, 35.4, { maxWidth: 13 });
+  doc.setFont("helvetica", "bold"); doc.setFontSize(6.3); doc.text(String(memberNo || "—").slice(0, 14), 68.0, 35.4, { maxWidth: 16.3 });
   doc.addImage(qr, "PNG", 5.0, 39.0, 11.2, 11.2);
   doc.setTextColor(8, 15, 13); doc.setFont("helvetica", "bold"); doc.setFontSize(4.8);
   doc.text("SCAN FOR", 18.1, 43.6); doc.text("VERIFICATION", 18.1, 47.3);
   const signature = await signatureInkDataUrl(p.signature_data ? String(p.signature_data) : null);
   if (signature) {
-    try { doc.addImage(signature, "PNG", 49.2, 43.3, 32.5, 4.8); } catch { /* use name below */ }
+    try { doc.addImage(signature, "PNG", 49.2, 39.1, 32.5, 9.1); } catch { /* use name below */ }
   } else {
     doc.setFont("times", "italic"); doc.setFontSize(8); doc.text(String(fullName || "Signature").slice(0, 28), 65.5, 47.5, { align: "center" });
   }
@@ -246,8 +246,8 @@ export async function downloadIdCardPdf({ profile, positionName, memberNo, qr, a
     const lines = wrap(doc, policy.replace(/\s+/g, " "), 72).slice(0, 7);
     lines.forEach((line, index) => doc.text(line, W / 2, 27 + index * 2.2, { align: "center" }));
   }
-  const issued = p.registered_at ? new Date(p.registered_at).toLocaleDateString(undefined, { month: "2-digit", year: "numeric" }) : "—";
-  doc.setTextColor(8, 15, 13); doc.setFont("helvetica", "bold"); doc.setFontSize(6.3); doc.text(issued, 49, 41.7, { align: "center", maxWidth: 12 });
+  const issued = p.registered_at ? new Date(p.registered_at).toLocaleDateString("en-GB") : "—";
+  doc.setTextColor(8, 15, 13); doc.setFont("helvetica", "bold"); doc.setFontSize(5.2); doc.text(issued, 49, 41.7, { align: "center", maxWidth: 12 });
 
   doc.save(`ecomedic-id-card-${memberNo ?? "member"}.pdf`);
 }

@@ -804,6 +804,7 @@ export type Database = {
         Args: { _revoked: boolean; _user_id: string }
         Returns: undefined
       }
+      generate_member_no: { Args: never; Returns: string }
       get_active_history: { Args: { period: string }; Returns: Json }
       get_admin_ids: { Args: never; Returns: string[] }
       get_admin_stats: { Args: never; Returns: Json }
