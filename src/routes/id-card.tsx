@@ -13,7 +13,6 @@ import { Download, Loader2, Printer } from "lucide-react";
 import { toast } from "sonner";
 import { Checkbox } from "@/components/ui/checkbox";
 import { PolicyView } from "@/components/PolicyView";
-import { MembershipPrintSheet } from "@/components/MembershipPrintSheet";
 import { MemberIdCard } from "@/components/MemberIdCard";
 import formTemplate from "@/assets/personal-information-form.pdf.asset.json";
 
