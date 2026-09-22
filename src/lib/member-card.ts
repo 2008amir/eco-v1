@@ -184,7 +184,7 @@ export async function downloadFormPdf({ profile, email, positionName, memberNo, 
 
   const page3 = pages[2];
   if (page3) {
-    page3.drawRectangle({ x: 220, y: 420, width: 160, height: 34, color: rgb(1, 1, 1) });
+    page3.drawRectangle({ x: 210, y: 438, width: 180, height: 40, color: rgb(1, 1, 1) });
     const words = (policy?.trim() || "No organizational policy has been published yet.").replace(/\s+/g, " ").split(" ");
     const lines: string[] = [];
     let line = "";
@@ -193,7 +193,7 @@ export async function downloadFormPdf({ profile, email, positionName, memberNo, 
       if (font.widthOfTextAtSize(next, 10) > 360) { lines.push(line); line = word; } else line = next;
     }
     if (line) lines.push(line);
-    lines.slice(0, 28).forEach((text, index) => page3.drawText(text, { x: 118, y: 390 - index * 15, size: 10, font, color: ink }));
+    lines.slice(0, 28).forEach((text, index) => page3.drawText(text, { x: 118, y: 420 - index * 15, size: 10, font, color: ink }));
   }
 
   downloadBytes(await pdf.save(), `ecomedic-form-${memberNo ?? "member"}.pdf`);
