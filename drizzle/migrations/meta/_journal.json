@@ -15,6 +15,13 @@
       "when": 1790041229875,
       "tag": "0001_rebuild_communities_projects",
       "breakpoints": true
+    },
+    {
+      "idx": 2,
+      "version": "7",
+      "when": 1790041290964,
+      "tag": "0002_rebuild_positions_payments",
+      "breakpoints": true
     }
   ]
 }

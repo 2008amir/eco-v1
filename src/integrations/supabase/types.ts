@@ -400,6 +400,125 @@ export type Database = {
         }
         Relationships: []
       }
+      payment_accounts: {
+        Row: {
+          account_name: string
+          account_number: string
+          bank_name: string
+          created_at: string
+          id: string
+          note: string | null
+          singleton: boolean
+          updated_at: string
+        }
+        Insert: {
+          account_name: string
+          account_number: string
+          bank_name: string
+          created_at?: string
+          id?: string
+          note?: string | null
+          singleton?: boolean
+          updated_at?: string
+        }
+        Update: {
+          account_name?: string
+          account_number?: string
+          bank_name?: string
+          created_at?: string
+          id?: string
+          note?: string | null
+          singleton?: boolean
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      payments: {
+        Row: {
+          amount: number
+          created_at: string
+          id: string
+          kind: string
+          period: string | null
+          position_id: string | null
+          receipt_url: string | null
+          reviewed_at: string | null
+          reviewed_by: string | null
+          status: string
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          amount?: number
+          created_at?: string
+          id?: string
+          kind?: string
+          period?: string | null
+          position_id?: string | null
+          receipt_url?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          amount?: number
+          created_at?: string
+          id?: string
+          kind?: string
+          period?: string | null
+          position_id?: string | null
+          receipt_url?: string | null
+          reviewed_at?: string | null
+          reviewed_by?: string | null
+          status?: string
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "payments_position_id_fkey"
+            columns: ["position_id"]
+            isOneToOne: false
+            referencedRelation: "positions"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      positions: {
+        Row: {
+          created_at: string
+          description: string
+          id: string
+          is_member: boolean
+          monthly_amount: number
+          name: string
+          reg_amount: number
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: string
+          id?: string
+          is_member?: boolean
+          monthly_amount?: number
+          name: string
+          reg_amount?: number
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: string
+          id?: string
+          is_member?: boolean
+          monthly_amount?: number
+          name?: string
+          reg_amount?: number
+          updated_at?: string
+        }
+        Relationships: []
+      }
       profiles: {
         Row: {
           address_line1: string | null
@@ -429,10 +548,17 @@ export type Database = {
           id_phone: string | null
           institution: string | null
           is_graduate: boolean | null
+          is_revoked: boolean
           last_name: string
+          member_no: string | null
           middle_name: string | null
+          onboarding_step: number
           phone: string | null
+          policy_accepted_at: string | null
+          position_id: string | null
+          position_pending: boolean
           program_of_study: string | null
+          registered_at: string | null
           school_level: string | null
           signature_data: string | null
           state: string | null
@@ -467,10 +593,17 @@ export type Database = {
           id_phone?: string | null
           institution?: string | null
           is_graduate?: boolean | null
+          is_revoked?: boolean
           last_name?: string
+          member_no?: string | null
           middle_name?: string | null
+          onboarding_step?: number
           phone?: string | null
+          policy_accepted_at?: string | null
+          position_id?: string | null
+          position_pending?: boolean
           program_of_study?: string | null
+          registered_at?: string | null
           school_level?: string | null
           signature_data?: string | null
           state?: string | null
@@ -505,17 +638,32 @@ export type Database = {
           id_phone?: string | null
           institution?: string | null
           is_graduate?: boolean | null
+          is_revoked?: boolean
           last_name?: string
+          member_no?: string | null
           middle_name?: string | null
+          onboarding_step?: number
           phone?: string | null
+          policy_accepted_at?: string | null
+          position_id?: string | null
+          position_pending?: boolean
           program_of_study?: string | null
+          registered_at?: string | null
           school_level?: string | null
           signature_data?: string | null
           state?: string | null
           updated_at?: string
           username?: string
         }
-        Relationships: []
+        Relationships: [
+          {
+            foreignKeyName: "profiles_position_id_fkey"
+            columns: ["position_id"]
+            isOneToOne: false
+            referencedRelation: "positions"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       research: {
         Row: {
@@ -526,6 +674,7 @@ export type Database = {
           description: string
           header_image_url: string | null
           id: string
+          post_kind: string
           research_number: string
           research_type: string
           section: string | null
@@ -540,6 +689,7 @@ export type Database = {
           description?: string
           header_image_url?: string | null
           id?: string
+          post_kind?: string
           research_number?: string
           research_type?: string
           section?: string | null
@@ -554,6 +704,7 @@ export type Database = {
           description?: string
           header_image_url?: string | null
           id?: string
+          post_kind?: string
           research_number?: string
           research_type?: string
           section?: string | null
@@ -609,6 +760,19 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      admin_pending_payments: { Args: { _kind: string }; Returns: Json }
+      admin_review_payment: {
+        Args: { _action: string; _payment_id: string }
+        Returns: undefined
+      }
+      admin_set_position: {
+        Args: { _position_id: string; _user_id: string }
+        Returns: undefined
+      }
+      admin_set_revoked: {
+        Args: { _revoked: boolean; _user_id: string }
+        Returns: undefined
+      }
       get_active_history: { Args: { period: string }; Returns: Json }
       get_admin_ids: { Args: never; Returns: string[] }
       get_admin_stats: { Args: never; Returns: Json }
@@ -644,6 +808,10 @@ export type Database = {
       is_username_available: { Args: { _username: string }; Returns: boolean }
       join_general_community: { Args: { _user_id: string }; Returns: undefined }
       record_my_activity: { Args: never; Returns: undefined }
+      set_community_general: {
+        Args: { _community_id: string; _general: boolean }
+        Returns: undefined
+      }
     }
     Enums: {
       app_role: "admin" | "user"
