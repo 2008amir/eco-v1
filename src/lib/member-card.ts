@@ -214,7 +214,7 @@ export async function downloadIdCardPdf({ profile, positionName, memberNo, qr, a
   if (front) doc.addImage(front, "PNG", 0, 0, W, H);
 
   if (avatar) {
-    try { doc.addImage(avatar, "JPEG", 61.2, 4.75, 20.65, 25.3); } catch { /* leave template photo */ }
+    try { doc.addImage(avatar, "JPEG", 60.9, 4.78, 21.25, 26.04); } catch { /* leave template photo */ }
   }
 
   const details: Array<[string, string]> = [
@@ -223,7 +223,7 @@ export async function downloadIdCardPdf({ profile, positionName, memberNo, qr, a
     ["BLOOD GROUP:", p.blood_group || "—"],
     ["PHONE NO:", p.id_phone || p.phone || "—"],
   ];
-  let y = 22.4;
+  let y = 21.2;
   details.forEach(([, value]) => {
     doc.setTextColor(8, 15, 13); doc.setFont("helvetica", "normal"); doc.setFontSize(5.8); doc.text(String(value).slice(0, 30), 26.4, y);
     y += 4.65;
