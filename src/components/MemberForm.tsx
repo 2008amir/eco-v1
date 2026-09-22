@@ -97,7 +97,7 @@ export function MemberForm({ form, onChange, signature, onSignatureChange, email
     <>
       <Section index={1} title="Personal information">
         <Field label="First name"><Input value={form.first_name} onChange={(e) => onChange("first_name", e.target.value)} className="glass" /></Field>
-        <Field label="Last name"><Input value={form.last_name} onChange={(e) => onChange("last_name", e.target.value)} className="glass" /></Field>
+        <Field label="Last name (optional)"><Input value={form.last_name} onChange={(e) => onChange("last_name", e.target.value)} className="glass" /></Field>
         <Field label="Middle name"><Input value={form.middle_name} onChange={(e) => onChange("middle_name", e.target.value)} className="glass" /></Field>
         <Field label="Phone number"><Input value={form.phone} onChange={(e) => onChange("phone", e.target.value)} className="glass" /></Field>
         <Field label="Gender">
