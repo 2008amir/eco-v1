@@ -7,7 +7,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 
 import { Logo } from "@/components/Logo";
-import { PasswordInput } from "@/components/PasswordInput";
+import { PasswordInput, isStrongPassword } from "@/components/PasswordInput";
 import { supabase } from "@/integrations/supabase/client";
 import { useAuth } from "@/lib/auth-context";
 import { toast } from "sonner";
@@ -20,7 +20,7 @@ const signInSchema = z.object({
 const signUpSchema = z.object({
   fullName: z.string().trim().min(2, "Required").max(120),
   email: z.string().trim().email("Invalid email").max(255),
-  password: z.string().min(1, "Required"),
+  password: z.string().refine(isStrongPassword, "Password must be 8+ characters with uppercase, lowercase, number and symbol"),
   confirmPassword: z.string(),
 }).refine((d) => d.password === d.confirmPassword, { message: "Passwords don't match", path: ["confirmPassword"] });
 
