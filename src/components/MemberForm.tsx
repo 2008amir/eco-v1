@@ -116,8 +116,8 @@ export function MemberForm({ form, onChange, signature, onSignatureChange, email
         <Field label="State"><Input value={form.state} onChange={(e) => onChange("state", e.target.value)} className="glass" /></Field>
         <Field label="Country" full><CountrySelect value={form.country} onChange={(v) => onChange("country", v)} /></Field>
         <Field label="Address line 1" full><Input value={form.address_line1} onChange={(e) => onChange("address_line1", e.target.value)} className="glass" /></Field>
-        <Field label="Address line 2" full><Input value={form.address_line2} onChange={(e) => onChange("address_line2", e.target.value)} className="glass" /></Field>
-        <Field label="Address line 3" full><Input value={form.address_line3} onChange={(e) => onChange("address_line3", e.target.value)} className="glass" /></Field>
+        <Field label="Address line 2 (optional)" full><Input value={form.address_line2} onChange={(e) => onChange("address_line2", e.target.value)} className="glass" /></Field>
+        <Field label="Address line 3 (optional)" full><Input value={form.address_line3} onChange={(e) => onChange("address_line3", e.target.value)} className="glass" /></Field>
         <Field label="Home number"><Input value={form.home_number} onChange={(e) => onChange("home_number", e.target.value)} className="glass" /></Field>
         <Field label="Home email"><Input type="email" value={form.home_email} onChange={(e) => onChange("home_email", e.target.value)} className="glass" /></Field>
       </Section>
