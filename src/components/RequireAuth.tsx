@@ -8,7 +8,8 @@ import { Button } from "@/components/ui/button";
 export function RequireAuth({ children, requireAdmin = false, skipOnboarding = false }: { children: ReactNode; requireAdmin?: boolean; skipOnboarding?: boolean }) {
   const { user, profile, isAdmin, rolesLoaded, rolesError, loading, refreshProfile } = useAuth();
   const navigate = useNavigate();
-  const onboardingDone = !profile || isAdmin || (profile.onboarding_step ?? 0) >= 6;
+  const registrationVerified = Boolean(profile?.registered_at && profile?.member_no);
+  const onboardingDone = !profile || isAdmin || registrationVerified || (profile.onboarding_step ?? 0) >= 6;
 
   useEffect(() => {
     if (loading) return;

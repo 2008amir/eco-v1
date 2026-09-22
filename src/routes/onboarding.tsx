@@ -87,6 +87,7 @@ function Onboarding() {
   const [busy, setBusy] = useState(false);
 
   const step = (profile as any)?.onboarding_step ?? 0;
+  const registrationVerified = Boolean(profile?.registered_at && profile?.member_no);
   const memberPosition = positions.find((p) => p.is_member);
 
   const { data: latestPayment } = useQuery({
@@ -120,7 +121,7 @@ function Onboarding() {
   useEffect(() => { setAccepted(false); }, [step]);
 
   useEffect(() => {
-    if (profile && step >= 6) navigate({ to: "/" });
+    if (profile && (step >= 6 || registrationVerified)) navigate({ to: "/" });
   }, [step, profile, navigate]);
 
   // Admins never fill the registration form — send them straight to the dashboard.
@@ -155,7 +156,7 @@ function Onboarding() {
     setBusy(false);
   };
 
-  if (!user) return null;
+  if (!user || registrationVerified) return null;
 
   const positionName = positions.find((p) => p.id === (profile as any)?.position_id)?.name ?? "Member";
   const memberNo = (profile as any)?.member_no ?? null;

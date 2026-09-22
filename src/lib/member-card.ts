@@ -162,31 +162,29 @@ export async function downloadFormPdf({ profile, email, positionName, memberNo, 
   if (!page1) throw new Error("The registration form template has no first page.");
   write(0, memberNo, 90, 155, 180, 9);
   write(0, positionName, 72, 177, 200, 9);
-  page1.drawRectangle({ x: 472, y: page1.getHeight() - 220, width: 88, height: 90, color: rgb(1, 1, 1) });
-  page1.drawImage(qrImage, { x: 480, y: page1.getHeight() - 213, width: 74, height: 74 });
+  page1.drawImage(qrImage, { x: 483, y: page1.getHeight() - 211, width: 70, height: 70 });
 
-  write(0, p.first_name, 107, 356, 170); write(0, p.last_name, 354, 356, 164);
-  write(0, p.middle_name, 116, 393, 166); write(0, p.username, 354, 393, 164);
-  write(0, p.date_of_birth, 113, 427, 170); write(0, p.phone, 354, 427, 164);
-  write(0, email, 119, 458, 169, 8); write(0, p.gender, 348, 458, 170);
-  write(0, p.country, 98, 588, 168); write(0, p.state, 339, 588, 169);
-  write(0, p.city, 80, 637, 169); write(0, p.home_number, 351, 637, 167);
-  write(0, p.home_email, 146, 677, 370, 8);
-  write(0, p.address_line1, 122, 708, 394, 8); write(0, p.address_line2, 122, 732, 394, 8); write(0, p.address_line3, 122, 756, 394, 8);
+  write(0, p.first_name, 107, 354, 170); write(0, p.last_name, 354, 354, 164);
+  write(0, p.middle_name, 116, 390, 166); write(0, p.username, 354, 391, 164);
+  write(0, p.date_of_birth, 113, 424, 170); write(0, p.phone, 354, 424, 164);
+  write(0, email, 121, 455, 167, 8); write(0, p.gender, 348, 455, 170);
+  write(0, p.country, 98, 587, 168); write(0, p.state, 339, 587, 169);
+  write(0, p.city, 80, 635, 169); write(0, p.home_number, 351, 635, 167);
+  write(0, p.home_email, 146, 676, 370, 8);
+  write(0, p.address_line1, 122, 706, 394, 8); write(0, p.address_line2, 122, 729, 394, 8); write(0, p.address_line3, 122, 751, 394, 8);
 
-  write(1, p.institution, 145, 121, 370, 9);
-  write(1, p.program_of_study, 116, 155, 166, 8); write(1, p.course_of_study, 344, 155, 169, 8);
-  write(1, p.is_graduate ? "Graduate" : p.school_level, 120, 187, 166, 8);
-  write(1, p.is_graduate ? p.graduation_year : "Not graduated", 453, 187, 59, 8);
-  write(1, p.guardian_name, 102, 351, 414); write(1, p.guardian_phone, 113, 373, 403);
-  write(1, p.guardian_address, 106, 395, 410, 8); write(1, p.guardian_relationship, 131, 418, 385);
-  write(1, p.emergency_name, 104, 539, 412); write(1, p.emergency_phone, 113, 562, 403);
-  write(1, p.emergency_relationship, 131, 585, 385);
+  write(1, p.institution, 145, 119, 370, 9);
+  write(1, p.program_of_study, 117, 153, 166, 8); write(1, p.course_of_study, 349, 153, 164, 8);
+  write(1, p.is_graduate ? "Graduate" : p.school_level, 120, 183, 166, 8);
+  write(1, p.is_graduate ? p.graduation_year : "Not graduated", 454, 183, 59, 8);
+  write(1, p.guardian_name, 104, 350, 412); write(1, p.guardian_phone, 113, 372, 403);
+  write(1, p.guardian_address, 113, 395, 403, 8); write(1, p.guardian_relationship, 132, 417, 384);
+  write(1, p.emergency_name, 106, 538, 410); write(1, p.emergency_phone, 113, 561, 403);
+  write(1, p.emergency_relationship, 134, 583, 382);
 
   const page3 = pages[2];
   if (page3) {
-    page3.drawRectangle({ x: 92, y: 118, width: 412, height: 420, color: rgb(1, 1, 1), opacity: 0.88 });
-    page3.drawText("ORGANIZATIONAL POLICY", { x: 188, y: 510, size: 15, font: bold, color: rgb(0.25, 0.48, 0.17) });
+    page3.drawRectangle({ x: 210, y: 438, width: 180, height: 40, color: rgb(1, 1, 1) });
     const words = (policy?.trim() || "No organizational policy has been published yet.").replace(/\s+/g, " ").split(" ");
     const lines: string[] = [];
     let line = "";
@@ -195,7 +193,7 @@ export async function downloadFormPdf({ profile, email, positionName, memberNo, 
       if (font.widthOfTextAtSize(next, 10) > 360) { lines.push(line); line = word; } else line = next;
     }
     if (line) lines.push(line);
-    lines.slice(0, 28).forEach((text, index) => page3.drawText(text, { x: 118, y: 480 - index * 15, size: 10, font, color: ink }));
+    lines.slice(0, 28).forEach((text, index) => page3.drawText(text, { x: 118, y: 420 - index * 15, size: 10, font, color: ink }));
   }
 
   downloadBytes(await pdf.save(), `ecomedic-form-${memberNo ?? "member"}.pdf`);
