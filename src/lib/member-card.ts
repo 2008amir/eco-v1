@@ -141,9 +141,8 @@ function downloadBytes(bytes: Uint8Array, filename: string) {
 /** Fill the uploaded three-page registration form without changing its artwork. */
 export async function downloadFormPdf({ profile, email, positionName, memberNo, qr, policy }: CardData) {
   const p = profile ?? {};
-  const response = await fetch(formTemplate.url);
-  if (!response.ok) throw new Error("The registration form template could not be loaded.");
-  const pdf = await PDFDocument.load(await response.arrayBuffer());
+  const templateBytes = await fetchTemplateBytes();
+  const pdf = await PDFDocument.load(templateBytes);
   const font = await pdf.embedFont(StandardFonts.Helvetica);
   const bold = await pdf.embedFont(StandardFonts.HelveticaBold);
   const qrImage = await pdf.embedPng(qr);
