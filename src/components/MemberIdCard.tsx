@@ -27,8 +27,8 @@ export function MemberIdCard(props: MemberIdCardProps) {
       >
         <div className={hasCustomPolicy ? "member-card-policy is-custom" : "member-card-policy"}>
           {hasCustomPolicy && <p>{props.policy}</p>}
-          <div><b>ISSUED:</b> {props.issued || "—"}</div>
         </div>
+        <div className="member-card-issued">{props.issued || "—"}</div>
       </section>
     );
   }
