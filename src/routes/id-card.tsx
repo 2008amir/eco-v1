@@ -8,7 +8,7 @@ import { useAuth } from "@/lib/auth-context";
 import { usePositions } from "@/lib/membership";
 import { usePolicyText } from "@/lib/org-policy";
 import { useStorageUrl } from "@/lib/storage-url";
-import { qrDataUrl, qrUrlFor, toDataUrl, downloadFormPdf, downloadIdCardPdf } from "@/lib/member-card";
+import { qrDataUrl, qrUrlFor, signatureInkDataUrl, toDataUrl, downloadFormPdf, downloadIdCardPdf } from "@/lib/member-card";
 import { Download, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 import { MemberIdCard } from "@/components/MemberIdCard";
@@ -35,6 +35,7 @@ function IdCardPage() {
   const { data: idPolicy } = usePolicyText("id_card");
   const [search, setSearch] = useState("");
   const [qr, setQr] = useState<string | null>(null);
+  const [signature, setSignature] = useState<string | null>(null);
   const [busy, setBusy] = useState<"form" | "card" | null>(null);
   const avatarUrl = useStorageUrl("avatars", profile?.avatar_url ?? null);
 
@@ -46,6 +47,9 @@ function IdCardPage() {
     : "—";
 
   useEffect(() => { qrDataUrl(memberNo).then(setQr).catch(() => setQr(null)); }, [memberNo]);
+  useEffect(() => {
+    signatureInkDataUrl(profile?.signature_data).then(setSignature).catch(() => setSignature(profile?.signature_data ?? null));
+  }, [profile?.signature_data]);
 
   const base = { profile: (profile ?? null) as Record<string, any> | null, email: user?.email ?? "", positionName, memberNo };
 
@@ -92,7 +96,7 @@ function IdCardPage() {
                   memberNo={memberNo || ""}
                   avatarUrl={avatarUrl}
                   qr={qr}
-                  signature={profile?.signature_data}
+                  signature={signature}
                 />
                 <MemberIdCard
                   side="back"

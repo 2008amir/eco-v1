@@ -58,6 +58,58 @@ export async function toDataUrl(url: string | null | undefined): Promise<string 
   }
 }
 
+/** Remove white/transparent margins so only the handwritten signature is rendered. */
+export async function signatureInkDataUrl(source: string | null | undefined): Promise<string | null> {
+  if (!source) return null;
+  return await new Promise<string | null>((resolve) => {
+    const image = new Image();
+    image.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = image.naturalWidth;
+      canvas.height = image.naturalHeight;
+      const context = canvas.getContext("2d", { willReadFrequently: true });
+      if (!context) { resolve(source); return; }
+      context.drawImage(image, 0, 0);
+      const pixels = context.getImageData(0, 0, canvas.width, canvas.height);
+      let left = canvas.width;
+      let top = canvas.height;
+      let right = -1;
+      let bottom = -1;
+      for (let y = 0; y < canvas.height; y += 1) {
+        for (let x = 0; x < canvas.width; x += 1) {
+          const index = (y * canvas.width + x) * 4;
+          const alpha = pixels.data[index + 3] ?? 0;
+          const red = pixels.data[index] ?? 255;
+          const green = pixels.data[index + 1] ?? 255;
+          const blue = pixels.data[index + 2] ?? 255;
+          if (alpha < 16 || (red > 242 && green > 242 && blue > 242)) {
+            pixels.data[index + 3] = 0;
+            continue;
+          }
+          left = Math.min(left, x);
+          top = Math.min(top, y);
+          right = Math.max(right, x);
+          bottom = Math.max(bottom, y);
+        }
+      }
+      if (right < left || bottom < top) { resolve(null); return; }
+      context.putImageData(pixels, 0, 0);
+      const padding = 3;
+      const cropLeft = Math.max(0, left - padding);
+      const cropTop = Math.max(0, top - padding);
+      const cropWidth = Math.min(canvas.width - cropLeft, right - left + 1 + padding * 2);
+      const cropHeight = Math.min(canvas.height - cropTop, bottom - top + 1 + padding * 2);
+      const cropped = document.createElement("canvas");
+      cropped.width = cropWidth;
+      cropped.height = cropHeight;
+      cropped.getContext("2d")?.drawImage(canvas, cropLeft, cropTop, cropWidth, cropHeight, 0, 0, cropWidth, cropHeight);
+      resolve(cropped.toDataURL("image/png"));
+    };
+    image.onerror = () => resolve(source);
+    image.src = source;
+  });
+}
+
 const GREEN = [20, 83, 45] as const;
 
 type CardData = {
@@ -162,9 +214,8 @@ export async function downloadIdCardPdf({ profile, positionName, memberNo, qr, a
   if (front) doc.addImage(front, "PNG", 0, 0, W, H);
 
   if (avatar) {
-    try { doc.addImage(avatar, "JPEG", 60.1, 4.5, 20.7, 25.5); } catch { /* leave template photo */ }
+    try { doc.addImage(avatar, "JPEG", 61.2, 4.75, 20.65, 25.3); } catch { /* leave template photo */ }
   }
-  doc.setDrawColor(91, 165, 58); doc.setLineWidth(0.5); doc.roundedRect(60.1, 4.5, 20.7, 25.5, 1, 1, "S");
 
   const details: Array<[string, string]> = [
     ["NAME:", fullName || "—"],
@@ -181,10 +232,11 @@ export async function downloadIdCardPdf({ profile, positionName, memberNo, qr, a
   doc.addImage(qr, "PNG", 5.0, 39.0, 11.2, 11.2);
   doc.setTextColor(8, 15, 13); doc.setFont("helvetica", "bold"); doc.setFontSize(4.8);
   doc.text("SCAN FOR", 18.1, 43.6); doc.text("VERIFICATION", 18.1, 47.3);
-  if (p.signature_data) {
-    try { doc.addImage(String(p.signature_data), "PNG", 49.3, 40.2, 27, 5.8); } catch { /* use name below */ }
+  const signature = await signatureInkDataUrl(p.signature_data ? String(p.signature_data) : null);
+  if (signature) {
+    try { doc.addImage(signature, "PNG", 49.2, 43.3, 32.5, 4.8); } catch { /* use name below */ }
   } else {
-    doc.setFont("times", "italic"); doc.setFontSize(8); doc.text(String(fullName || "Signature").slice(0, 28), 62.8, 44.3, { align: "center" });
+    doc.setFont("times", "italic"); doc.setFontSize(8); doc.text(String(fullName || "Signature").slice(0, 28), 65.5, 47.5, { align: "center" });
   }
 
   // Back
@@ -197,7 +249,7 @@ export async function downloadIdCardPdf({ profile, positionName, memberNo, qr, a
     lines.forEach((line, index) => doc.text(line, W / 2, 27 + index * 2.2, { align: "center" }));
   }
   const issued = p.registered_at ? new Date(p.registered_at).toLocaleDateString(undefined, { month: "2-digit", year: "numeric" }) : "—";
-  doc.setTextColor(8, 15, 13); doc.setFont("helvetica", "normal"); doc.setFontSize(4.2); doc.text(issued, 43.3, 41.7);
+  doc.setTextColor(8, 15, 13); doc.setFont("helvetica", "normal"); doc.setFontSize(4.2); doc.text(issued, 49, 41.7, { align: "center" });
 
   doc.save(`ecomedic-id-card-${memberNo ?? "member"}.pdf`);
 }
