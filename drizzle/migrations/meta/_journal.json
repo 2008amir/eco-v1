@@ -43,6 +43,13 @@
       "when": 1790108162324,
       "tag": "0005_complete_onboarding_on_verified_registration_payment",
       "breakpoints": true
+    },
+    {
+      "idx": 6,
+      "version": "7",
+      "when": 1790108203292,
+      "tag": "0006_preserve_revoke_and_complete_verified_onboarding",
+      "breakpoints": true
     }
   ]
 }
