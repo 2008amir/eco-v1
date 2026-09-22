@@ -452,17 +452,20 @@
   background-size: 100% 100%;
   container-type: inline-size;
 }
-.member-card-details { position: absolute; left: 30.8%; top: 35.8%; width: 34%; }
-.member-card-details dl { margin: 0; }
-.member-card-details dl div { display: flex; align-items: center; height: clamp(18px, 5.1cqw, 28px); }
-.member-card-details dd { margin: 0; min-width: 0; overflow: hidden; font-size: clamp(8px, 2.25cqw, 14px); line-height: 1.15; white-space: nowrap; text-overflow: ellipsis; }
+.member-card-details, .member-card-details dl { position: absolute; inset: 0; margin: 0; }
+.member-card-details dl div { position: absolute; display: flex; align-items: center; height: 7%; }
+.member-card-details dd { margin: 0; min-width: 0; overflow: hidden; font-size: clamp(10px, 3.375cqw, 21px); font-weight: 700; line-height: 1; white-space: nowrap; text-overflow: ellipsis; }
+.member-card-name { left: 16.2%; top: 35.2%; width: 54.2%; }
+.member-card-position { left: 22.3%; top: 43.0%; width: 48.1%; }
+.member-card-blood { left: 30%; top: 50.8%; width: 40.4%; }
+.member-card-phone { left: 23.7%; top: 58.5%; width: 46.7%; }
 .member-card-photo { position: absolute; z-index: 2; left: 71.15%; top: 8.85%; width: 24.8%; height: 48.25%; display: grid; place-items: center; overflow: hidden; border-radius: 4.2%; background: transparent; color: #587066; font-size: clamp(8px, 2cqw, 12px); }
 .member-card-photo img { width: 100%; height: 100%; object-fit: cover; }
-.member-card-number { position: absolute; left: 79.9%; top: 61.8%; width: 15.5%; overflow: hidden; font-size: clamp(7px, 1.9cqw, 12px); line-height: 1; white-space: nowrap; }
+.member-card-number { position: absolute; left: 80.1%; top: 61.1%; width: 15.3%; overflow: hidden; font-size: clamp(10px, 2.85cqw, 18px); font-weight: 700; line-height: 1; white-space: nowrap; }
 .member-card-verify { position: absolute; left: 5.1%; bottom: 4.2%; width: 39%; display: flex; align-items: center; gap: 5%; }
 .member-card-verify img, .member-card-verify > span { width: 41%; aspect-ratio: 1; flex: 0 0 auto; background: #fff; object-fit: contain; }
 .member-card-verify strong { font-size: clamp(8px, 2.9cqw, 18px); line-height: 1.05; }
-.member-card-signature { position: absolute; left: 57.5%; top: 82.3%; width: 38.5%; height: 7.1%; display: grid; place-items: end center; background: transparent; }
+.member-card-signature { position: absolute; left: 57.5%; top: 79.8%; width: 38.5%; height: 9.7%; display: grid; place-items: end center; background: transparent; }
 .member-card-signature img { width: 92%; height: 100%; object-fit: contain; object-position: center bottom; }
 .member-card-signature span { font-family: cursive; font-style: italic; font-size: clamp(12px, 3.5cqw, 22px); white-space: nowrap; overflow: hidden; max-width: 100%; }
 .member-id-card-back { border-color: var(--id-green); color: #fff; text-align: center; }
@@ -470,7 +473,7 @@
 .member-card-policy p { display: -webkit-box; margin: 0; max-width: 96%; overflow: hidden; color: transparent; -webkit-box-orient: vertical; -webkit-line-clamp: 7; font-size: clamp(6px, 1.55cqw, 10px); line-height: 1.08; white-space: pre-line; }
 .member-card-policy.is-custom { inset: 38% 6% 15%; justify-content: center; background: var(--id-green); }
 .member-card-policy.is-custom p { color: white; }
-.member-card-issued { position: absolute; left: 50.1%; top: 74.7%; width: 14%; height: 3.9%; display: grid; place-items: center; overflow: hidden; color: #07120e; font-size: clamp(6px, 1.65cqw, 10px); line-height: 1; white-space: nowrap; }
+.member-card-issued { position: absolute; left: 49.9%; top: 74.1%; width: 14.8%; height: 4.4%; display: grid; place-items: center; overflow: hidden; color: #07120e; font-size: clamp(8px, 2.45cqw, 15px); font-weight: 700; line-height: 1; white-space: nowrap; }
 .member-form-preview { width: 100%; height: min(72vh, 760px); border: 1px solid var(--color-border); border-radius: var(--radius-md); background: var(--color-card); }
 
 /* Printable membership form */

@@ -217,18 +217,16 @@ export async function downloadIdCardPdf({ profile, positionName, memberNo, qr, a
     try { doc.addImage(avatar, "JPEG", 60.9, 4.78, 21.25, 26.04); } catch { /* leave template photo */ }
   }
 
-  const details: Array<[string, string]> = [
-    ["NAME:", fullName || "—"],
-    ["POSITION:", positionName || "—"],
-    ["BLOOD GROUP:", p.blood_group || "—"],
-    ["PHONE NO:", p.id_phone || p.phone || "—"],
+  const details: Array<[string, number, number]> = [
+    [fullName || "—", 13.9, 21.4],
+    [positionName || "—", 19.1, 26.0],
+    [p.blood_group || "—", 25.7, 30.7],
+    [p.id_phone || p.phone || "—", 20.3, 35.3],
   ];
-  let y = 21.2;
-  details.forEach(([, value]) => {
-    doc.setTextColor(8, 15, 13); doc.setFont("helvetica", "normal"); doc.setFontSize(5.8); doc.text(String(value).slice(0, 30), 26.4, y);
-    y += 4.65;
+  details.forEach(([value, x, y]) => {
+    doc.setTextColor(8, 15, 13); doc.setFont("helvetica", "bold"); doc.setFontSize(8.7); doc.text(String(value).slice(0, 30), x, y, { maxWidth: 40 });
   });
-  doc.setFont("helvetica", "normal"); doc.setFontSize(5.2); doc.text(String(memberNo || "—").slice(0, 17), 68.2, 35.8);
+  doc.setFont("helvetica", "bold"); doc.setFontSize(7.8); doc.text(String(memberNo || "—").slice(0, 17), 68.6, 35.4, { maxWidth: 13 });
   doc.addImage(qr, "PNG", 5.0, 39.0, 11.2, 11.2);
   doc.setTextColor(8, 15, 13); doc.setFont("helvetica", "bold"); doc.setFontSize(4.8);
   doc.text("SCAN FOR", 18.1, 43.6); doc.text("VERIFICATION", 18.1, 47.3);
@@ -249,7 +247,7 @@ export async function downloadIdCardPdf({ profile, positionName, memberNo, qr, a
     lines.forEach((line, index) => doc.text(line, W / 2, 27 + index * 2.2, { align: "center" }));
   }
   const issued = p.registered_at ? new Date(p.registered_at).toLocaleDateString(undefined, { month: "2-digit", year: "numeric" }) : "—";
-  doc.setTextColor(8, 15, 13); doc.setFont("helvetica", "normal"); doc.setFontSize(4.2); doc.text(issued, 49, 41.7, { align: "center" });
+  doc.setTextColor(8, 15, 13); doc.setFont("helvetica", "bold"); doc.setFontSize(6.3); doc.text(issued, 49, 41.7, { align: "center", maxWidth: 12 });
 
   doc.save(`ecomedic-id-card-${memberNo ?? "member"}.pdf`);
 }
