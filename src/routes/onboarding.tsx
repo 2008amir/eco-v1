@@ -30,7 +30,7 @@ export const Route = createFileRoute("/onboarding")({
 });
 
 function Onboarding() {
-  const { user, profile, refreshProfile } = useAuth();
+  const { user, profile, isAdmin, rolesLoaded, refreshProfile } = useAuth();
   const navigate = useNavigate();
   const { data: positions = [] } = usePositions();
   const [form, setForm] = useState<FormState>(EMPTY_MEMBER_FORM);
@@ -74,6 +74,11 @@ function Onboarding() {
   useEffect(() => {
     if (profile && step >= 6) navigate({ to: "/" });
   }, [step, profile, navigate]);
+
+  // Admins never fill the registration form — send them straight to the dashboard.
+  useEffect(() => {
+    if (rolesLoaded && isAdmin) navigate({ to: "/" });
+  }, [rolesLoaded, isAdmin, navigate]);
 
   const setStep = async (n: number, extra: Record<string, unknown> = {}) => {
     if (!user) return;
