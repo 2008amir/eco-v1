@@ -157,7 +157,12 @@ async function fetchTemplateBytes(): Promise<ArrayBuffer> {
 }
 
 /** Fill the uploaded three-page registration form without changing its artwork. */
-export async function downloadFormPdf({ profile, email, positionName, memberNo, qr, policy }: CardData) {
+export async function downloadFormPdf(data: CardData) {
+  downloadBytes(await buildFormPdfBytes(data), `ecomedic-form-${data.memberNo ?? "member"}.pdf`);
+}
+
+/** Same filled form as {@link downloadFormPdf}, returned as bytes for preview/printing. */
+export async function buildFormPdfBytes({ profile, email, positionName, memberNo, qr, policy }: CardData) {
   const p = profile ?? {};
   const templateBytes = await fetchTemplateBytes();
   const pdf = await PDFDocument.load(templateBytes);
@@ -221,7 +226,7 @@ export async function downloadFormPdf({ profile, email, positionName, memberNo, 
     lines.slice(0, maxLines).forEach((text, index) => page3.drawText(text, { x: margin, y: startY - index * leading, size: 10, font, color: ink }));
   }
 
-  downloadBytes(await pdf.save(), `ecomedic-form-${memberNo ?? "member"}.pdf`);
+  return pdf.save();
 }
 
 /** Two-sided CR80 ID card PDF: each page is exactly 85.60 × 53.98 mm. */
