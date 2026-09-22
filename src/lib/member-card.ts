@@ -164,28 +164,27 @@ export async function downloadFormPdf({ profile, email, positionName, memberNo, 
   write(0, positionName, 72, 177, 200, 9);
   page1.drawImage(qrImage, { x: 483, y: page1.getHeight() - 211, width: 70, height: 70 });
 
-  write(0, p.first_name, 107, 358, 170); write(0, p.last_name, 354, 358, 164);
-  write(0, p.middle_name, 116, 394, 166); write(0, p.username, 354, 395, 164);
-  write(0, p.date_of_birth, 113, 428, 170); write(0, p.phone, 354, 428, 164);
-  write(0, email, 121, 459, 167, 8); write(0, p.gender, 348, 459, 170);
-  write(0, p.country, 98, 591, 168); write(0, p.state, 339, 591, 169);
-  write(0, p.city, 80, 639, 169); write(0, p.home_number, 351, 639, 167);
-  write(0, p.home_email, 146, 680, 370, 8);
-  write(0, p.address_line1, 122, 710, 394, 8); write(0, p.address_line2, 122, 733, 394, 8); write(0, p.address_line3, 122, 755, 394, 8);
+  write(0, p.first_name, 107, 354, 170); write(0, p.last_name, 354, 354, 164);
+  write(0, p.middle_name, 116, 390, 166); write(0, p.username, 354, 391, 164);
+  write(0, p.date_of_birth, 113, 424, 170); write(0, p.phone, 354, 424, 164);
+  write(0, email, 121, 455, 167, 8); write(0, p.gender, 348, 455, 170);
+  write(0, p.country, 98, 587, 168); write(0, p.state, 339, 587, 169);
+  write(0, p.city, 80, 635, 169); write(0, p.home_number, 351, 635, 167);
+  write(0, p.home_email, 146, 676, 370, 8);
+  write(0, p.address_line1, 122, 706, 394, 8); write(0, p.address_line2, 122, 729, 394, 8); write(0, p.address_line3, 122, 751, 394, 8);
 
-  write(1, p.institution, 145, 123, 370, 9);
-  write(1, p.program_of_study, 117, 157, 166, 8); write(1, p.course_of_study, 349, 157, 164, 8);
-  write(1, p.is_graduate ? "Graduate" : p.school_level, 120, 187, 166, 8);
-  write(1, p.is_graduate ? p.graduation_year : "Not graduated", 454, 187, 59, 8);
-  write(1, p.guardian_name, 104, 354, 412); write(1, p.guardian_phone, 113, 376, 403);
-  write(1, p.guardian_address, 113, 399, 403, 8); write(1, p.guardian_relationship, 132, 421, 384);
-  write(1, p.emergency_name, 106, 542, 410); write(1, p.emergency_phone, 113, 565, 403);
-  write(1, p.emergency_relationship, 134, 587, 382);
+  write(1, p.institution, 145, 119, 370, 9);
+  write(1, p.program_of_study, 117, 153, 166, 8); write(1, p.course_of_study, 349, 153, 164, 8);
+  write(1, p.is_graduate ? "Graduate" : p.school_level, 120, 183, 166, 8);
+  write(1, p.is_graduate ? p.graduation_year : "Not graduated", 454, 183, 59, 8);
+  write(1, p.guardian_name, 104, 350, 412); write(1, p.guardian_phone, 113, 372, 403);
+  write(1, p.guardian_address, 113, 395, 403, 8); write(1, p.guardian_relationship, 132, 417, 384);
+  write(1, p.emergency_name, 106, 538, 410); write(1, p.emergency_phone, 113, 561, 403);
+  write(1, p.emergency_relationship, 134, 583, 382);
 
   const page3 = pages[2];
   if (page3) {
-    page3.drawRectangle({ x: 92, y: 118, width: 412, height: 420, color: rgb(1, 1, 1), opacity: 0.78 });
-    page3.drawText("ORGANIZATIONAL POLICY", { x: 188, y: 510, size: 15, font: bold, color: rgb(0.25, 0.48, 0.17) });
+    page3.drawRectangle({ x: 225, y: 326, width: 150, height: 28, color: rgb(1, 1, 1), opacity: 0.9 });
     const words = (policy?.trim() || "No organizational policy has been published yet.").replace(/\s+/g, " ").split(" ");
     const lines: string[] = [];
     let line = "";
@@ -194,7 +193,7 @@ export async function downloadFormPdf({ profile, email, positionName, memberNo, 
       if (font.widthOfTextAtSize(next, 10) > 360) { lines.push(line); line = word; } else line = next;
     }
     if (line) lines.push(line);
-    lines.slice(0, 28).forEach((text, index) => page3.drawText(text, { x: 118, y: 480 - index * 15, size: 10, font, color: ink }));
+    lines.slice(0, 28).forEach((text, index) => page3.drawText(text, { x: 118, y: 340 - index * 15, size: 10, font, color: ink }));
   }
 
   downloadBytes(await pdf.save(), `ecomedic-form-${memberNo ?? "member"}.pdf`);
