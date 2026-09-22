@@ -138,6 +138,24 @@ function downloadBytes(bytes: Uint8Array, filename: string) {
   URL.revokeObjectURL(url);
 }
 
+/** Load the uploaded template, retrying a few times so a flaky first request never blocks the download. */
+async function fetchTemplateBytes(): Promise<ArrayBuffer> {
+  let lastError: unknown = null;
+  for (let attempt = 0; attempt < 4; attempt += 1) {
+    try {
+      const response = await fetch(formTemplate.url, { cache: attempt === 0 ? "default" : "reload" });
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      const bytes = await response.arrayBuffer();
+      if (bytes.byteLength > 0) return bytes;
+      throw new Error("empty template");
+    } catch (error) {
+      lastError = error;
+      await new Promise((resolve) => setTimeout(resolve, 350 * (attempt + 1)));
+    }
+  }
+  throw new Error(`The registration form could not be loaded. Please check your connection and try again. (${String((lastError as Error)?.message ?? lastError)})`);
+}
+
 /** Fill the uploaded three-page registration form without changing its artwork. */
 export async function downloadFormPdf({ profile, email, positionName, memberNo, qr, policy }: CardData) {
   const p = profile ?? {};
