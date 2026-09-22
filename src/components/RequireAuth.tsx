@@ -9,7 +9,7 @@ export function RequireAuth({ children, requireAdmin = false, skipOnboarding = f
   const { user, profile, isAdmin, rolesLoaded, rolesError, loading, refreshProfile } = useAuth();
   const navigate = useNavigate();
   const registrationVerified = Boolean(profile?.registered_at && profile?.member_no);
-  const onboardingDone = !profile || isAdmin || registrationVerified || (profile.onboarding_step ?? 0) >= 6;
+  const onboardingDone = !profile || isAdmin || (registrationVerified && (profile.onboarding_step ?? 0) >= 6);
 
   useEffect(() => {
     if (loading) return;
