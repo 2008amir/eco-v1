@@ -8,6 +8,13 @@
       "when": 1790041172586,
       "tag": "0000_rebuild_core_schema",
       "breakpoints": true
+    },
+    {
+      "idx": 1,
+      "version": "7",
+      "when": 1790041229875,
+      "tag": "0001_rebuild_communities_projects",
+      "breakpoints": true
     }
   ]
 }

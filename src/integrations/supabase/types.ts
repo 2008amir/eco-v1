@@ -112,7 +112,9 @@ export type Database = {
           description: string
           id: string
           invite_code: string
+          is_general: boolean
           location: string | null
+          members_can_post: boolean
           name: string
           updated_at: string
           visibility: string
@@ -125,7 +127,9 @@ export type Database = {
           description?: string
           id?: string
           invite_code?: string
+          is_general?: boolean
           location?: string | null
+          members_can_post?: boolean
           name: string
           updated_at?: string
           visibility?: string
@@ -138,7 +142,9 @@ export type Database = {
           description?: string
           id?: string
           invite_code?: string
+          is_general?: boolean
           location?: string | null
+          members_can_post?: boolean
           name?: string
           updated_at?: string
           visibility?: string
@@ -243,6 +249,85 @@ export type Database = {
         Relationships: [
           {
             foreignKeyName: "community_messages_community_id_fkey"
+            columns: ["community_id"]
+            isOneToOne: false
+            referencedRelation: "communities"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      community_project_reviews: {
+        Row: {
+          author_id: string
+          content: string
+          created_at: string
+          id: string
+          project_id: string
+          title: string | null
+        }
+        Insert: {
+          author_id: string
+          content?: string
+          created_at?: string
+          id?: string
+          project_id: string
+          title?: string | null
+        }
+        Update: {
+          author_id?: string
+          content?: string
+          created_at?: string
+          id?: string
+          project_id?: string
+          title?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_project_reviews_project_id_fkey"
+            columns: ["project_id"]
+            isOneToOne: false
+            referencedRelation: "community_projects"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      community_projects: {
+        Row: {
+          community_id: string
+          created_at: string
+          created_by: string
+          description: string
+          id: string
+          image_url: string | null
+          name: string
+          status: string
+          updated_at: string
+        }
+        Insert: {
+          community_id: string
+          created_at?: string
+          created_by: string
+          description?: string
+          id?: string
+          image_url?: string | null
+          name: string
+          status?: string
+          updated_at?: string
+        }
+        Update: {
+          community_id?: string
+          created_at?: string
+          created_by?: string
+          description?: string
+          id?: string
+          image_url?: string | null
+          name?: string
+          status?: string
+          updated_at?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "community_projects_community_id_fkey"
             columns: ["community_id"]
             isOneToOne: false
             referencedRelation: "communities"
@@ -525,6 +610,7 @@ export type Database = {
     }
     Functions: {
       get_active_history: { Args: { period: string }; Returns: Json }
+      get_admin_ids: { Args: never; Returns: string[] }
       get_admin_stats: { Args: never; Returns: Json }
       get_any_admin_id: { Args: never; Returns: string }
       get_email_for_username: { Args: { _username: string }; Returns: string }
@@ -551,7 +637,12 @@ export type Database = {
         Args: { _community_id: string; _user_id: string }
         Returns: boolean
       }
+      is_community_owner: {
+        Args: { _community_id: string; _user_id: string }
+        Returns: boolean
+      }
       is_username_available: { Args: { _username: string }; Returns: boolean }
+      join_general_community: { Args: { _user_id: string }; Returns: undefined }
       record_my_activity: { Args: never; Returns: undefined }
     }
     Enums: {
