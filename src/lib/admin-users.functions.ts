@@ -15,11 +15,18 @@ export const deleteMemberAccount = createServerFn({ method: "POST" })
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     // Remove private uploads before deleting their payment and profile rows.
     for (const bucket of ["avatars", "receipts"] as const) {
-      const { data: files, error: listError } = await supabaseAdmin.storage.from(bucket).list(data.userId, { limit: 1000 });
-      if (listError) throw listError;
-      const paths = (files ?? []).filter((file) => file.name !== ".emptyFolderPlaceholder").map((file) => `${data.userId}/${file.name}`);
-      if (paths.length) {
-        const { error: removeError } = await supabaseAdmin.storage.from(bucket).remove(paths);
+      let offset = 0;
+      let batch: string[] = [];
+      const paths: string[] = [];
+      do {
+        const { data: files, error: listError } = await supabaseAdmin.storage.from(bucket).list(data.userId, { limit: 1000, offset });
+        if (listError) throw listError;
+        batch = (files ?? []).map((file) => file.name).filter((name) => name !== ".emptyFolderPlaceholder");
+        paths.push(...batch.map((name) => `${data.userId}/${name}`));
+        offset += 1000;
+      } while (batch.length === 1000);
+      for (let i = 0; i < paths.length; i += 1000) {
+        const { error: removeError } = await supabaseAdmin.storage.from(bucket).remove(paths.slice(i, i + 1000));
         if (removeError) throw removeError;
       }
     }

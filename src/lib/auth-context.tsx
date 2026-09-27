@@ -43,6 +43,7 @@ export type Profile = {
   onboarding_step?: number | null;
   policy_accepted_at?: string | null;
   registered_at?: string | null;
+  registration_payment_verified?: boolean | null;
   is_revoked?: boolean | null;
   account_status?: string | null;
   position_pending?: boolean | null;
