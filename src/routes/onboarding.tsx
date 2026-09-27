@@ -88,13 +88,14 @@ function Onboarding() {
   const [busy, setBusy] = useState(false);
 
   const formComplete = isRegistrationComplete(profile);
-  const step = formComplete ? 6 : profile?.registered_at && profile?.member_no ? 0 : (profile?.onboarding_step ?? 0);
+  const step = formComplete ? 6 : profile?.registered_at && profile?.member_no && profile?.registration_payment_verified ? 0 : Math.min(profile?.onboarding_step ?? 0, 3);
   const memberPosition = positions.find((p) => p.is_member);
 
   const { data: latestPayment } = useQuery({
     queryKey: ["my-registration-payment", user?.id, step],
     enabled: !!user && step >= 2 && step < 6,
     refetchInterval: 15_000,
+    refetchOnWindowFocus: true,
     queryFn: async () => {
       const { data, error } = await supabase.from("payments").select("*").eq("user_id", user!.id)
         .eq("kind", "registration").order("created_at", { ascending: false }).limit(1).maybeSingle();
@@ -105,7 +106,7 @@ function Onboarding() {
 
   useEffect(() => {
     if (latestPayment?.status === "verified" && step === 3) void refreshProfile();
-  }, [latestPayment]);
+  }, [latestPayment, step, refreshProfile]);
 
   useEffect(() => {
     if (!profile) return;
