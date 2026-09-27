@@ -108,10 +108,6 @@ function Onboarding() {
   }, [latestPayment]);
 
   useEffect(() => {
-    if (step === 2 && latestPayment?.status === "pending") void refreshProfile();
-  }, [step, latestPayment?.id, latestPayment?.status, refreshProfile]);
-
-  useEffect(() => {
     if (!profile) return;
     const next: FormState = { ...EMPTY_MEMBER_FORM };
     Object.keys(EMPTY_MEMBER_FORM).forEach((k) => {
