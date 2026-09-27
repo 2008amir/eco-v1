@@ -31,7 +31,7 @@ function PdfPage({ pdf, pageNumber }: { pdf: PDFDocumentProxy; pageNumber: numbe
       target.style.height = `${viewport.height}px`;
       const context = target.getContext("2d");
       if (!context) return;
-      task = page.render({ canvas: target, canvasContext: context, viewport, transform: [pixelRatio, 0, 0, pixelRatio, 0, 0] });
+      task = page.render({ canvasContext: context, viewport, transform: [pixelRatio, 0, 0, pixelRatio, 0, 0] });
       try { await task.promise; } catch (error) { if (!cancelled) console.error("Could not draw form page", error); }
     };
     void draw().catch((error) => { if (!cancelled) console.error("Could not load form page", error); });

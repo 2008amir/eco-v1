@@ -12,12 +12,12 @@ export function RequireAuth({ children, requireAdmin = false, skipOnboarding = f
   const onboardingDone = isAdmin || isRegistrationComplete(profile);
 
   useEffect(() => {
-    if (loading) return;
+    if (loading || (user && !rolesLoaded)) return;
     if (!user) {
       navigate({ to: "/" });
       return;
     }
-    if (!skipOnboarding && !profile?.is_revoked && !onboardingDone) {
+    if (!skipOnboarding && profile?.account_status !== "suspended" && profile?.account_status !== "banned" && !profile?.is_revoked && !onboardingDone) {
       navigate({ to: "/onboarding" });
       return;
     }
@@ -28,13 +28,14 @@ export function RequireAuth({ children, requireAdmin = false, skipOnboarding = f
     }
   }, [user, profile, isAdmin, rolesLoaded, rolesError, loading, requireAdmin, skipOnboarding, onboardingDone, navigate]);
 
-  if (profile?.is_revoked) {
+  if (profile?.account_status === "suspended" || profile?.account_status === "banned" || profile?.is_revoked) {
+    const suspended = profile.account_status === "suspended";
     return (
       <div className="min-h-screen flex items-center justify-center px-4">
         <div className="glass-strong rounded-2xl p-6 max-w-sm text-center">
           <AlertTriangle className="mx-auto h-8 w-8 text-destructive" />
-          <h1 className="mt-4 text-lg font-semibold">Access revoked</h1>
-          <p className="mt-2 text-sm text-muted-foreground">Your access to Ecomedic Squad has been revoked. Please contact the administration.</p>
+          <h1 className="mt-4 text-lg font-semibold">{suspended ? "Your account was suspended" : "Your account was banned from this site"}</h1>
+          <p className="mt-2 text-sm text-muted-foreground">{suspended ? "Your account is temporarily unavailable. Please contact the administration for more information." : "You can no longer access Ecomedic Squad. Please contact the administration if you believe this is a mistake."}</p>
         </div>
       </div>
     );

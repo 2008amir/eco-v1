@@ -1,2 +1,3 @@
 - Render form PDF previews with browser-side PDF.js canvases rather than embedded PDF iframes, because mobile browsers replace embedded PDFs with an Open placeholder.
 - Gate member pages on persisted, complete registration and administrator-approved payment; never infer approval from local state, because returning users must resume the saved flow securely.
+- Manage account suspension and bans in a protected administrator database function; delete auth identities only from an authenticated, role-checked server function so the same email can register afresh.

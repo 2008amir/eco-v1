@@ -43,7 +43,9 @@ export type Profile = {
   onboarding_step?: number | null;
   policy_accepted_at?: string | null;
   registered_at?: string | null;
+  registration_payment_verified?: boolean | null;
   is_revoked?: boolean | null;
+  account_status?: string | null;
   position_pending?: boolean | null;
   pending_position_id?: string | null;
 };
@@ -153,6 +155,12 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const expiresAt = data.session?.expires_at ?? 0;
       if (!data.session) return;
       if (expiresAt * 1000 - Date.now() < 60_000) await refreshSupabaseSession();
+      const requestId = loadRequestRef.current;
+      const result = await loadAuthStateRequest();
+      if (result.error || !result.data || loadRequestRef.current !== requestId) return;
+      const state = result.data as { profile: Profile | null; is_admin: boolean | null };
+      setProfile(state.profile);
+      setIsAdmin(Boolean(state.is_admin));
     };
 
     const onVisible = () => void ensureFreshSession();
@@ -160,8 +168,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       window.addEventListener("focus", onVisible);
       document.addEventListener("visibilitychange", onVisible);
     }
+    const statusInterval = setInterval(onVisible, 30_000);
 
     return () => {
+      clearInterval(statusInterval);
       subscription.unsubscribe();
       if (typeof window !== "undefined") {
         window.removeEventListener("focus", onVisible);

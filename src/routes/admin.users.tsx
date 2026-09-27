@@ -3,7 +3,17 @@ import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { withSupabaseRetry } from "@/lib/supabase-retry";
 
-export const Route = createFileRoute("/admin/users")({ component: AdminUsersLayout });
+export const Route = createFileRoute("/admin/users")({
+  component: AdminUsersLayout,
+  head: () => ({ meta: [
+    { title: "Users — Ecomedic Squad Admin" },
+    { name: "description", content: "Review member accounts and manage access in Ecomedic Squad." },
+    { property: "og:title", content: "Users — Ecomedic Squad Admin" },
+    { property: "og:description", content: "Review member accounts and manage access in Ecomedic Squad." },
+    { property: "og:type", content: "website" },
+    { name: "twitter:card", content: "summary" },
+  ] }),
+});
 
 function AdminUsersLayout() {
   const location = useLocation();
