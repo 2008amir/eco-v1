@@ -14,6 +14,7 @@ import { toast } from "sonner";
 import { Checkbox } from "@/components/ui/checkbox";
 import { PolicyView } from "@/components/PolicyView";
 import { MemberIdCard } from "@/components/MemberIdCard";
+import { FormPdfPreview } from "@/components/FormPdfPreview";
 import formTemplate from "@/assets/personal-information-form.pdf.asset.json";
 
 export const Route = createFileRoute("/id-card")({
@@ -152,7 +153,7 @@ function IdCardPage() {
 
               {!verified && (
                 <>
-                  <iframe className="member-form-preview" src={`${formTemplate.url}#toolbar=0&navpanes=0`} title="Official member registration form" />
+                  <FormPdfPreview url={formTemplate.url} />
                   <Button onClick={onForm} disabled={!qr || busy !== null} className="gradient-bg text-primary-foreground hover:opacity-90">
                     {busy === "form" ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}Download form
                   </Button>
@@ -174,7 +175,7 @@ function IdCardPage() {
                 <>
                   <p className="text-sm text-muted-foreground">Check your details below, then print or download your completed form.</p>
                   {previewUrl ? (
-                    <iframe className="member-form-preview" src={`${previewUrl}#toolbar=0&navpanes=0`} title="Completed registration form preview" />
+                    <FormPdfPreview url={previewUrl} />
                   ) : (
                     <div className="member-form-preview flex items-center justify-center text-sm text-muted-foreground">
                       <Loader2 className="mr-2 h-4 w-4 animate-spin" />Preparing your completed form…

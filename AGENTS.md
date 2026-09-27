@@ -1,0 +1,1 @@
+- Render form PDF previews with browser-side PDF.js canvases rather than embedded PDF iframes, because mobile browsers replace embedded PDFs with an Open placeholder.
