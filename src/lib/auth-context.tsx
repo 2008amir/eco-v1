@@ -44,6 +44,7 @@ export type Profile = {
   policy_accepted_at?: string | null;
   registered_at?: string | null;
   is_revoked?: boolean | null;
+  account_status?: string | null;
   position_pending?: boolean | null;
   pending_position_id?: string | null;
 };
