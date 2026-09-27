@@ -12,7 +12,7 @@ export function RequireAuth({ children, requireAdmin = false, skipOnboarding = f
   const onboardingDone = isAdmin || isRegistrationComplete(profile);
 
   useEffect(() => {
-    if (loading) return;
+    if (loading || (user && !rolesLoaded)) return;
     if (!user) {
       navigate({ to: "/" });
       return;
