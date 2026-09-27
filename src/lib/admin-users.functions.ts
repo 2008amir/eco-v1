@@ -14,7 +14,7 @@ export const deleteMemberAccount = createServerFn({ method: "POST" })
 
     const { supabaseAdmin } = await import("@/integrations/supabase/client.server");
     // Remove private uploads before deleting their payment and profile rows.
-    for (const bucket of ["avatars", "receipts"] as const) {
+    for (const bucket of ["avatars", "receipts", "chat-files", "community-files", "community-images", "research-images", "research-media"] as const) {
       let offset = 0;
       let batch: string[] = [];
       const paths: string[] = [];
