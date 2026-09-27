@@ -62,22 +62,6 @@ type AuthContextValue = {
 };
 
 const ROLE_RETRY_DELAYS = [120, 280];
-function profileFromUser(user: User): Profile {
-  const meta = user.user_metadata ?? {};
-  return {
-    id: user.id,
-    first_name: typeof meta.first_name === "string" ? meta.first_name : "",
-    last_name: typeof meta.last_name === "string" ? meta.last_name : "",
-    username:
-      typeof meta.username === "string" && meta.username.trim()
-        ? meta.username
-        : user.email?.split("@")[0] ?? "user",
-    country: typeof meta.country === "string" ? meta.country : "",
-    phone: typeof meta.phone === "string" ? meta.phone : null,
-    avatar_url: typeof meta.avatar_url === "string" ? meta.avatar_url : null,
-  };
-}
-
 async function loadAuthStateRequest() {
   return withSupabaseRetry(
     () => supabase.rpc("get_my_auth_state").single(),
