@@ -1,0 +1,1 @@
+ALTER POLICY "Users create own payments" ON public.payments WITH CHECK (user_id = auth.uid() AND status = 'pending');
