@@ -154,8 +154,9 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const expiresAt = data.session?.expires_at ?? 0;
       if (!data.session) return;
       if (expiresAt * 1000 - Date.now() < 60_000) await refreshSupabaseSession();
+      const requestId = loadRequestRef.current;
       const result = await loadAuthStateRequest();
-      if (result.error || !result.data) return;
+      if (result.error || !result.data || loadRequestRef.current !== requestId) return;
       const state = result.data as { profile: Profile | null; is_admin: boolean | null };
       setProfile(state.profile);
       setIsAdmin(Boolean(state.is_admin));
