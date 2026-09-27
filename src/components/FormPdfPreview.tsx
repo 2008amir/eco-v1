@@ -47,23 +47,23 @@ export function FormPdfPreview({ url }: { url: string }) {
 
   useEffect(() => {
     let active = true;
-    let loaded: PDFDocumentProxy | undefined;
+    let loadingTask: import("pdfjs-dist").PDFDocumentLoadingTask | undefined;
     setPdf(null);
     setError(false);
     const load = async () => {
       const pdfjs = await import("pdfjs-dist");
       pdfjs.GlobalWorkerOptions.workerSrc = workerUrl;
-      const task = pdfjs.getDocument(url);
+      const task = pdfjs.getDocument({ url });
+      loadingTask = task;
       try {
-        loaded = await task.promise;
+        const loaded = await task.promise;
         if (active) setPdf(loaded);
-        else await loaded.destroy();
       } catch (cause) {
         if (active) { console.error("Could not preview form", cause); setError(true); }
       }
     };
     void load();
-    return () => { active = false; if (loaded) void loaded.destroy(); };
+    return () => { active = false; if (loadingTask) void loadingTask.destroy(); };
   }, [url]);
 
   if (error) return <p className="text-sm text-destructive" role="alert">The preview could not be displayed. You can still download the form.</p>;
