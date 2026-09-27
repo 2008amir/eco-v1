@@ -4,12 +4,12 @@ import { useAuth } from "@/lib/auth-context";
 import { AuthScreen } from "@/components/AuthScreen";
 import { AlertTriangle, Loader2, RefreshCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { isRegistrationComplete } from "@/lib/registration";
 
 export function RequireAuth({ children, requireAdmin = false, skipOnboarding = false }: { children: ReactNode; requireAdmin?: boolean; skipOnboarding?: boolean }) {
   const { user, profile, isAdmin, rolesLoaded, rolesError, loading, refreshProfile } = useAuth();
   const navigate = useNavigate();
-  const registrationVerified = Boolean(profile?.registered_at && profile?.member_no);
-  const onboardingDone = !profile || isAdmin || (registrationVerified && (profile.onboarding_step ?? 0) >= 6);
+  const onboardingDone = isAdmin || isRegistrationComplete(profile);
 
   useEffect(() => {
     if (loading) return;
@@ -17,7 +17,7 @@ export function RequireAuth({ children, requireAdmin = false, skipOnboarding = f
       navigate({ to: "/" });
       return;
     }
-    if (!skipOnboarding && profile && !profile.is_revoked && !onboardingDone) {
+    if (!skipOnboarding && !profile?.is_revoked && !onboardingDone) {
       navigate({ to: "/onboarding" });
       return;
     }
@@ -56,11 +56,15 @@ export function RequireAuth({ children, requireAdmin = false, skipOnboarding = f
     );
   }
 
+  if (user && rolesLoaded && rolesError) {
+    return <div className="min-h-screen flex items-center justify-center px-4"><div className="glass-strong rounded-2xl p-6 max-w-sm text-center"><AlertTriangle className="mx-auto h-8 w-8 text-primary" /><p className="mt-4 text-sm">We could not check your registration status.</p><Button onClick={refreshProfile} className="mt-5"><RefreshCcw className="mr-2 h-4 w-4" />Retry</Button></div></div>;
+  }
+
   if (!loading && !user) {
     return <AuthScreen />;
   }
 
-  if (loading || !user || (requireAdmin && !rolesLoaded)) {
+  if (loading || !user || !rolesLoaded) {
     return (
       <div className="min-h-screen flex items-center justify-center px-4">
         <div className="glass-strong rounded-2xl p-6 max-w-sm text-center">
@@ -72,6 +76,8 @@ export function RequireAuth({ children, requireAdmin = false, skipOnboarding = f
   }
 
   if (requireAdmin && !isAdmin) return null;
+
+  if (!skipOnboarding && !onboardingDone) return null;
 
   return <>{children}</>;
 }

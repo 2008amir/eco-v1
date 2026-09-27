@@ -542,6 +542,7 @@ export type Database = {
       }
       profiles: {
         Row: {
+          account_status: string
           address_line1: string | null
           address_line2: string | null
           address_line3: string | null
@@ -588,6 +589,7 @@ export type Database = {
           username: string
         }
         Insert: {
+          account_status?: string
           address_line1?: string | null
           address_line2?: string | null
           address_line3?: string | null
@@ -634,6 +636,7 @@ export type Database = {
           username: string
         }
         Update: {
+          account_status?: string
           address_line1?: string | null
           address_line2?: string | null
           address_line3?: string | null
@@ -794,6 +797,10 @@ export type Database = {
       admin_pending_payments: { Args: { _kind: string }; Returns: Json }
       admin_review_payment: {
         Args: { _action: string; _payment_id: string }
+        Returns: undefined
+      }
+      admin_set_account_status: {
+        Args: { _status: string; _user_id: string }
         Returns: undefined
       }
       admin_set_position: {

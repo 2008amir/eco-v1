@@ -50,6 +50,27 @@
       "when": 1790108203292,
       "tag": "0006_preserve_revoke_and_complete_verified_onboarding",
       "breakpoints": true
+    },
+    {
+      "idx": 7,
+      "version": "7",
+      "when": 1790545370372,
+      "tag": "0007_enforce_complete_form_and_admin_approved_registration",
+      "breakpoints": true
+    },
+    {
+      "idx": 8,
+      "version": "7",
+      "when": 1790545460403,
+      "tag": "0008_add_member_account_status",
+      "breakpoints": true
+    },
+    {
+      "idx": 9,
+      "version": "7",
+      "when": 1790545472367,
+      "tag": "0009_protect_account_status_and_registration",
+      "breakpoints": true
     }
   ]
 }

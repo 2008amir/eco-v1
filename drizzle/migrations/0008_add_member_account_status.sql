@@ -1,0 +1,2 @@
+ALTER TABLE public.profiles ADD COLUMN account_status text NOT NULL DEFAULT 'active' CHECK (account_status IN ('active','suspended','banned'));
+COMMENT ON COLUMN public.profiles.account_status IS 'Administrator-managed account access: active, suspended, or banned.';
