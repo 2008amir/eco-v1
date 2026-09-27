@@ -92,7 +92,7 @@ function Onboarding() {
 
   const { data: latestPayment } = useQuery({
     queryKey: ["my-registration-payment", user?.id, step],
-    enabled: !!user && step === 3,
+    enabled: !!user && step >= 2 && step < 6,
     refetchInterval: 15_000,
     queryFn: async () => {
       const { data, error } = await supabase.from("payments").select("*").eq("user_id", user!.id)
@@ -105,6 +105,10 @@ function Onboarding() {
   useEffect(() => {
     if (latestPayment && latestPayment.status !== "pending") void refreshProfile();
   }, [latestPayment]);
+
+  useEffect(() => {
+    if (step === 2 && latestPayment?.status === "pending") void refreshProfile();
+  }, [step, latestPayment?.id, latestPayment?.status, refreshProfile]);
 
   useEffect(() => {
     if (!profile) return;
@@ -156,7 +160,7 @@ function Onboarding() {
     setBusy(false);
   };
 
-  if (!user || (step >= 6 && registrationVerified)) return null;
+  if (!user || (step >= 6 && registrationVerified) || (rolesLoaded && isAdmin)) return null;
 
   const positionName = positions.find((p) => p.id === (profile as any)?.position_id)?.name ?? "Member";
   const memberNo = (profile as any)?.member_no ?? null;
@@ -199,7 +203,11 @@ function Onboarding() {
           </>
         )}
 
-        {step === 2 && (
+        {step === 2 && latestPayment?.status === "pending" && (
+          <div className="glass-strong rounded-2xl p-8 text-center space-y-3"><Clock className="mx-auto h-10 w-10 text-primary" /><h1 className="text-xl font-semibold">Your payment is under review</h1><p className="text-sm text-muted-foreground">You can continue once an administrator approves your payment.</p><Button variant="outline" onClick={() => refreshProfile()}>Check again</Button></div>
+        )}
+
+        {step === 2 && latestPayment?.status !== "pending" && (
           <PaymentStep
             userId={user.id}
             kind="registration"
@@ -214,7 +222,7 @@ function Onboarding() {
           <div className="glass-strong rounded-2xl p-8 text-center space-y-3">
             <Clock className="mx-auto h-10 w-10 text-primary" />
             <h1 className="text-xl font-semibold">Your payment is under review</h1>
-            <p className="text-sm text-muted-foreground">After it is verified you will be redirected to the dashboard.</p>
+            <p className="text-sm text-muted-foreground">You can continue once an administrator approves your payment.</p>
             <Button variant="outline" onClick={() => refreshProfile()}>Check again</Button>
           </div>
         )}

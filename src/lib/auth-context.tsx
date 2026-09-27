@@ -62,16 +62,6 @@ type AuthContextValue = {
 };
 
 const ROLE_RETRY_DELAYS = [120, 280];
-const ADMIN_BOOTSTRAP_USER_ID = "6e0915e6-c64e-482d-883e-0112ee39b560";
-const ADMIN_BOOTSTRAP_EMAIL = "ecomedicsquad@gmail.com";
-
-function isBootstrapAdmin(user: User | null) {
-  return Boolean(
-    user &&
-      (user.id === ADMIN_BOOTSTRAP_USER_ID || user.email?.toLowerCase() === ADMIN_BOOTSTRAP_EMAIL)
-  );
-}
-
 function profileFromUser(user: User): Profile {
   const meta = user.user_metadata ?? {};
   return {
@@ -110,7 +100,6 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const initializedRef = useRef(false);
 
   const loadAuthStateWithRetry = async (requestId: number, currentUser: User, attempt = 0): Promise<void> => {
-    const fallbackAdmin = isBootstrapAdmin(currentUser);
     const authStateResult = await loadAuthStateRequest();
 
     if (loadRequestRef.current !== requestId) return;
@@ -119,28 +108,26 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       return loadAuthStateWithRetry(requestId, currentUser, attempt + 1);
     }
     if (authStateResult.error) {
-      setProfile(profileFromUser(currentUser));
-      setIsAdmin(fallbackAdmin);
-      setRolesError(null);
+      setProfile(null);
+      setIsAdmin(false);
+      setRolesError("Could not check your registration. Please retry.");
       setRolesLoaded(true);
       return;
     }
 
     const row = authStateResult.data as { profile: Profile | null; is_admin: boolean | null } | null;
-    setProfile(row?.profile ?? profileFromUser(currentUser));
-    setIsAdmin(Boolean(row?.is_admin) || fallbackAdmin);
-    setRolesError(null);
+    setProfile(row?.profile ?? null);
+    setIsAdmin(Boolean(row?.is_admin));
+    setRolesError(row?.profile || row?.is_admin ? null : "Could not find your registration. Please retry.");
     setRolesLoaded(true);
   };
 
   const loadUserData = async (currentUser: User) => {
     const requestId = ++loadRequestRef.current;
-    const fallbackAdmin = isBootstrapAdmin(currentUser);
     setRolesLoaded(false);
     setRolesError(null);
-    setProfile(profileFromUser(currentUser));
-    setIsAdmin(fallbackAdmin);
-    if (fallbackAdmin) setRolesLoaded(true);
+    setProfile(null);
+    setIsAdmin(false);
     await loadAuthStateWithRetry(requestId, currentUser);
   };
 
