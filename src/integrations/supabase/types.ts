@@ -799,6 +799,10 @@ export type Database = {
         Args: { _action: string; _payment_id: string }
         Returns: undefined
       }
+      admin_set_account_status: {
+        Args: { _status: string; _user_id: string }
+        Returns: undefined
+      }
       admin_set_position: {
         Args: { _position_id: string; _user_id: string }
         Returns: undefined
