@@ -1,2 +1,3 @@
 - [ ] Show PDF pages directly in the form preview on mobile.
 - [ ] Keep every non-admin in registration/payment review until form is complete and admin verifies payment, including after returning.
+- [ ] Add admin user actions: permanently delete account for fresh signup, suspend/return, and ban with distinct sign-in messages.
