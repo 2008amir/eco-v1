@@ -106,7 +106,7 @@ function Onboarding() {
 
   useEffect(() => {
     if (latestPayment?.status === "verified" && step === 3) void refreshProfile();
-  }, [latestPayment, step, refreshProfile]);
+  }, [latestPayment, step]);
 
   useEffect(() => {
     if (!profile) return;
