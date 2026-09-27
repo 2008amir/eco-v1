@@ -62,6 +62,7 @@ import { PolicyView } from "@/components/PolicyView";
 import { PaymentStep } from "@/components/PaymentStep";
 import { MembershipPrintSheet } from "@/components/MembershipPrintSheet";
 import { usePositions } from "@/lib/membership";
+import { isRegistrationComplete } from "@/lib/registration";
 
 export const Route = createFileRoute("/onboarding")({
   component: () => <RequireAuth skipOnboarding><Onboarding /></RequireAuth>,
@@ -86,8 +87,8 @@ function Onboarding() {
   const [accepted, setAccepted] = useState(false);
   const [busy, setBusy] = useState(false);
 
-  const step = (profile as any)?.onboarding_step ?? 0;
-  const registrationVerified = Boolean(profile?.registered_at && profile?.member_no);
+  const formComplete = isRegistrationComplete(profile);
+  const step = formComplete ? 6 : profile?.registered_at && profile?.member_no ? 0 : (profile?.onboarding_step ?? 0);
   const memberPosition = positions.find((p) => p.is_member);
 
   const { data: latestPayment } = useQuery({
@@ -103,7 +104,7 @@ function Onboarding() {
   });
 
   useEffect(() => {
-    if (latestPayment && latestPayment.status !== "pending") void refreshProfile();
+    if (latestPayment?.status === "verified" && step === 3) void refreshProfile();
   }, [latestPayment]);
 
   useEffect(() => {
@@ -125,8 +126,8 @@ function Onboarding() {
   useEffect(() => { setAccepted(false); }, [step]);
 
   useEffect(() => {
-    if (profile && step >= 6 && registrationVerified) navigate({ to: "/" });
-  }, [step, profile, registrationVerified, navigate]);
+    if (formComplete) navigate({ to: "/" });
+  }, [formComplete, navigate]);
 
   // Admins never fill the registration form — send them straight to the dashboard.
   useEffect(() => {
@@ -160,7 +161,7 @@ function Onboarding() {
     setBusy(false);
   };
 
-  if (!user || (step >= 6 && registrationVerified) || (rolesLoaded && isAdmin)) return null;
+  if (!user || formComplete || (rolesLoaded && isAdmin)) return null;
 
   const positionName = positions.find((p) => p.id === (profile as any)?.position_id)?.name ?? "Member";
   const memberNo = (profile as any)?.member_no ?? null;
@@ -203,11 +204,15 @@ function Onboarding() {
           </>
         )}
 
+        {step === 2 && latestPayment?.status === "verified" && (
+          <div className="glass-strong rounded-2xl p-8 text-center space-y-3"><h1 className="text-xl font-semibold">Payment approved</h1><p className="text-sm text-muted-foreground">Your payment has been approved by an administrator.</p><Button onClick={() => setStep(6)} disabled={busy}>Continue to dashboard</Button></div>
+        )}
+
         {step === 2 && latestPayment?.status === "pending" && (
           <div className="glass-strong rounded-2xl p-8 text-center space-y-3"><Clock className="mx-auto h-10 w-10 text-primary" /><h1 className="text-xl font-semibold">Your payment is under review</h1><p className="text-sm text-muted-foreground">You can continue once an administrator approves your payment.</p><Button variant="outline" onClick={() => refreshProfile()}>Check again</Button></div>
         )}
 
-        {step === 2 && latestPayment?.status !== "pending" && (
+        {step === 2 && latestPayment !== undefined && latestPayment?.status !== "pending" && latestPayment?.status !== "verified" && (
           <PaymentStep
             userId={user.id}
             kind="registration"

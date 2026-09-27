@@ -4,12 +4,12 @@ import { useAuth } from "@/lib/auth-context";
 import { AuthScreen } from "@/components/AuthScreen";
 import { AlertTriangle, Loader2, RefreshCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { isRegistrationComplete } from "@/lib/registration";
 
 export function RequireAuth({ children, requireAdmin = false, skipOnboarding = false }: { children: ReactNode; requireAdmin?: boolean; skipOnboarding?: boolean }) {
   const { user, profile, isAdmin, rolesLoaded, rolesError, loading, refreshProfile } = useAuth();
   const navigate = useNavigate();
-  const registrationVerified = Boolean(profile?.registered_at && profile?.member_no);
-  const onboardingDone = isAdmin || (registrationVerified && (profile?.onboarding_step ?? 0) >= 6);
+  const onboardingDone = isAdmin || isRegistrationComplete(profile);
 
   useEffect(() => {
     if (loading) return;
