@@ -159,7 +159,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
       const result = await loadAuthStateRequest();
       if (result.error || !result.data || loadRequestRef.current !== requestId) return;
       const state = result.data as { profile: Profile | null; is_admin: boolean | null };
-      setProfile(state.profile);
+      setProfile((prev) => (JSON.stringify(prev) === JSON.stringify(state.profile) ? prev : state.profile));
       setIsAdmin(Boolean(state.is_admin));
     };
 
@@ -180,8 +180,22 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     };
   }, []);
 
+  // Silent refresh: keep the current profile on screen (no loading screen,
+  // no unmounting forms) and only swap it in when something actually changed.
   const refreshProfile = async () => {
-    if (user) await loadUserData(user);
+    if (!user) return;
+    const requestId = loadRequestRef.current;
+    const result = await loadAuthStateRequest();
+    if (loadRequestRef.current !== requestId) return;
+    if (result.error || !result.data) {
+      if (!profile) await loadUserData(user);
+      return;
+    }
+    const state = result.data as { profile: Profile | null; is_admin: boolean | null };
+    setProfile((prev) => (JSON.stringify(prev) === JSON.stringify(state.profile) ? prev : state.profile));
+    setIsAdmin(Boolean(state.is_admin));
+    setRolesError(state.profile || state.is_admin ? null : "Could not find your registration. Please retry.");
+    setRolesLoaded(true);
   };
 
   const signOut = async () => {
