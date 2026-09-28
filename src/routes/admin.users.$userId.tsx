@@ -10,6 +10,7 @@ import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, 
 import { toast } from "sonner";
 import { deleteMemberAccount } from "@/lib/admin-users.functions";
 import { useAuth } from "@/lib/auth-context";
+import { StorageImage } from "@/components/StorageImage";
 
 export const Route = createFileRoute("/admin/users/$userId")({
   component: UserDetail,
@@ -87,7 +88,7 @@ function UserDetail() {
 
       <div className="glass-strong rounded-2xl p-6 flex items-center gap-4">
         {p.avatar_url ? (
-          <img src={p.avatar_url} alt={p.username} className="h-16 w-16 rounded-full object-cover" />
+          <StorageImage bucket="avatars" path={p.avatar_url} alt={p.username} className="h-16 w-16 rounded-full object-cover" />
         ) : (
           <div className="h-16 w-16 rounded-full gradient-bg flex items-center justify-center text-xl font-bold text-primary-foreground">
             {(p.username ?? "?")[0]?.toUpperCase()}
