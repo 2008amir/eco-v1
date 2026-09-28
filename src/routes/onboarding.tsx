@@ -1,5 +1,5 @@
 import { createFileRoute, useNavigate } from "@tanstack/react-router";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { RequireAuth } from "@/components/RequireAuth";
 import { Button } from "@/components/ui/button";
@@ -91,7 +91,7 @@ function Onboarding() {
   const step = formComplete ? 6 : profile?.registered_at && profile?.member_no && profile?.registration_payment_verified ? 0 : Math.min(profile?.onboarding_step ?? 0, 3);
   const memberPosition = positions.find((p) => p.is_member);
 
-  const { data: latestPayment } = useQuery({
+  const { data: latestPayment, isError: paymentError } = useQuery({
     queryKey: ["my-registration-payment", user?.id, step],
     enabled: !!user && step >= 2 && step < 6,
     refetchInterval: 15_000,
@@ -108,8 +108,12 @@ function Onboarding() {
     if (latestPayment?.status === "verified" && step === 3) void refreshProfile();
   }, [latestPayment, step]);
 
+  // Load saved answers once per user; later profile refreshes must never wipe
+  // what the person is currently typing.
+  const loadedFor = useRef<string | null>(null);
   useEffect(() => {
-    if (!profile) return;
+    if (!profile || loadedFor.current === profile.id) return;
+    loadedFor.current = profile.id;
     const next: FormState = { ...EMPTY_MEMBER_FORM };
     Object.keys(EMPTY_MEMBER_FORM).forEach((k) => {
       const val = (profile as unknown as Record<string, unknown>)[k];
@@ -209,7 +213,11 @@ function Onboarding() {
           <div className="glass-strong rounded-2xl p-8 text-center space-y-3"><Clock className="mx-auto h-10 w-10 text-primary" /><h1 className="text-xl font-semibold">Your payment is under review</h1><p className="text-sm text-muted-foreground">You can continue once an administrator approves your payment.</p><Button variant="outline" onClick={() => refreshProfile()}>Check again</Button></div>
         )}
 
-        {step === 2 && latestPayment !== undefined && latestPayment?.status !== "pending" && latestPayment?.status !== "verified" && (
+        {step === 2 && latestPayment === undefined && !paymentError && (
+          <div className="flex justify-center py-10"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
+        )}
+
+        {step === 2 && (latestPayment !== undefined || paymentError) && latestPayment?.status !== "pending" && latestPayment?.status !== "verified" && (
           <PaymentStep
             userId={user.id}
             kind="registration"
