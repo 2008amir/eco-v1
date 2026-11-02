@@ -1,14 +1,14 @@
-import { createRouter, useRouter } from "@tanstack/react-router";
+import { createRouter, useRouter, type ErrorComponentProps } from "@tanstack/react-router";
 import { QueryClient } from "@tanstack/react-query";
 import { routeTree } from "./routeTree.gen";
 
-function DefaultErrorComponent({ error, reset }: { error: Error; reset: () => void }) {
+function DefaultErrorComponent({ error, reset }: ErrorComponentProps) {
   const router = useRouter();
   return (
     <div className="flex min-h-screen items-center justify-center px-4">
       <div className="max-w-md text-center glass-strong rounded-2xl p-8">
         <h1 className="text-2xl font-bold gradient-text">Something went wrong</h1>
-        <p className="mt-2 text-sm text-muted-foreground">{error.message || "An unexpected error occurred."}</p>
+        <p className="mt-2 text-sm text-muted-foreground">{(error as Error)?.message || "An unexpected error occurred."}</p>
         <div className="mt-6 flex items-center justify-center gap-3">
           <button
             onClick={() => { router.invalidate(); reset(); }}
