@@ -8,7 +8,7 @@ function DefaultErrorComponent({ error, reset }: ErrorComponentProps) {
     <div className="flex min-h-screen items-center justify-center px-4">
       <div className="max-w-md text-center glass-strong rounded-2xl p-8">
         <h1 className="text-2xl font-bold gradient-text">Something went wrong</h1>
-        <p className="mt-2 text-sm text-muted-foreground">{error.message || "An unexpected error occurred."}</p>
+        <p className="mt-2 text-sm text-muted-foreground">{(error as Error)?.message || "An unexpected error occurred."}</p>
         <div className="mt-6 flex items-center justify-center gap-3">
           <button
             onClick={() => { router.invalidate(); reset(); }}
