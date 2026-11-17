@@ -6,7 +6,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft } from "lucide-react";
 import { PaymentPlan } from "@/components/admin/PaymentPlan";
-import { AwaitingVerification } from "@/components/admin/AwaitingVerification";
+import { AwaitingVerification, AwaitingVerificationCount } from "@/components/admin/AwaitingVerification";
 import { monthlyPeriods, periodLabel, periodStart } from "@/lib/membership";
 
 export const Route = createFileRoute("/admin/month-revenue")({ component: MonthRevenue });
@@ -87,7 +87,7 @@ function MonthRevenue() {
       <Tabs defaultValue="plan">
         <TabsList>
           <TabsTrigger value="plan">Payment plans</TabsTrigger>
-          <TabsTrigger value="awaiting">Awaiting verification</TabsTrigger>
+          <TabsTrigger value="awaiting">Awaiting verification<AwaitingVerificationCount kind="monthly" /></TabsTrigger>
           <TabsTrigger value="users">Users pay</TabsTrigger>
         </TabsList>
         <TabsContent value="plan" className="mt-4"><PaymentPlan field="monthly_amount" /></TabsContent>

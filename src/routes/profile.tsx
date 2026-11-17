@@ -38,6 +38,7 @@ function ProfilePage() {
   const [password, setPassword] = useState("");
   const [saving, setSaving] = useState(false);
   const [uploading, setUploading] = useState(false);
+  const [avatarPreview, setAvatarPreview] = useState<string | null>(null);
   const avatarUrl = useStorageUrl("avatars", form.avatar_url);
 
   useEffect(() => {
@@ -52,20 +53,33 @@ function ProfilePage() {
     setSignature(profile.signature_data ?? null);
   }, [profile]);
 
+  useEffect(() => {
+    if (!avatarPreview) return;
+    return () => URL.revokeObjectURL(avatarPreview);
+  }, [avatarPreview]);
+
   const onAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file || !user) return;
     setUploading(true);
+    setAvatarPreview(URL.createObjectURL(file));
     const ext = file.name.split(".").pop();
     const path = `${user.id}/avatar-${Date.now()}.${ext}`;
     const { error: upErr } = await uploadWithSupabaseRetry("avatars", path, file, { contentType: file.type, upsert: true }, 6);
-    if (upErr) { toast.error(upErr.message); setUploading(false); return; }
-    setForm((f) => ({ ...f, avatar_url: path }));
-    await withSupabaseRetry(() =>
+    if (upErr) { setAvatarPreview(null); toast.error(upErr.message); setUploading(false); return; }
+    const { error: profileError } = await withSupabaseRetry(() =>
       supabase.from("profiles").update({ avatar_url: path, updated_at: new Date().toISOString() }).eq("id", user.id),
       4,
       { kind: "table", target: "profiles", action: "save avatar" },
     );
+    if (profileError) {
+      await supabase.storage.from("avatars").remove([path]);
+      setAvatarPreview(null);
+      toast.error(profileError.message);
+      setUploading(false);
+      return;
+    }
+    setForm((f) => ({ ...f, avatar_url: path }));
     await refreshProfile();
     setUploading(false);
     toast.success("Avatar updated");
@@ -110,7 +124,7 @@ function ProfilePage() {
         <form onSubmit={onSubmit} className="space-y-5">
           <div className="glass-strong rounded-2xl p-6 flex flex-col items-center text-center gap-3">
             <Avatar className="h-28 w-28 ring-2 ring-border">
-              <AvatarImage src={avatarUrl ?? undefined} alt="Your avatar" />
+              <AvatarImage src={avatarPreview ?? avatarUrl ?? undefined} alt="Your avatar" />
               <AvatarFallback className="gradient-bg text-primary-foreground text-2xl font-bold">{initials}</AvatarFallback>
             </Avatar>
             <label className="inline-flex items-center gap-2 px-3 py-2 rounded-md glass cursor-pointer hover:bg-muted/50 text-sm">

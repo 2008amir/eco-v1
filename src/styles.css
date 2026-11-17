@@ -465,7 +465,7 @@
 .member-card-verify { position: absolute; left: 5.1%; bottom: 4.2%; width: 39%; display: flex; align-items: center; gap: 5%; }
 .member-card-verify img, .member-card-verify > span { width: 41%; aspect-ratio: 1; flex: 0 0 auto; background: #fff; object-fit: contain; }
 .member-card-verify strong { font-size: clamp(8px, 2.9cqw, 18px); line-height: 1.05; }
-.member-card-signature { position: absolute; left: 57.5%; top: 72.5%; width: 38.5%; height: 16.8%; display: grid; place-items: end center; background: transparent; }
+.member-card-signature { position: absolute; left: 57.5%; bottom: 10.5%; top: auto; width: 38.5%; height: 16.5%; display: grid; place-items: end center; background: transparent; }
 .member-card-signature img { width: 92%; height: 100%; object-fit: contain; object-position: center bottom; }
 .member-card-signature span { font-family: cursive; font-style: italic; font-size: clamp(12px, 3.5cqw, 22px); white-space: nowrap; overflow: hidden; max-width: 100%; }
 .member-id-card-back { border-color: var(--id-green); color: #fff; text-align: center; }

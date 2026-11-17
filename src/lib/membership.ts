@@ -93,6 +93,8 @@ export function usePaymentAccount() {
 export function usePendingPayments(kind: "registration" | "monthly" | "position") {
   return useQuery({
     queryKey: ["pending-payments", kind],
+    refetchInterval: 15_000,
+    refetchOnWindowFocus: true,
     queryFn: async () => {
       const { data, error } = await supabase.rpc("admin_pending_payments", { _kind: kind });
       if (error) throw error;

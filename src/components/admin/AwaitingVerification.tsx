@@ -85,3 +85,17 @@ export function AwaitingVerification({ kind }: { kind: "registration" | "monthly
     </div>
   );
 }
+
+export function AwaitingVerificationCount({ kind }: { kind: "registration" | "monthly" }) {
+  const { data = [] } = usePendingPayments(kind);
+  if (data.length === 0) return null;
+
+  return (
+    <span
+      aria-label={`${data.length} awaiting verification`}
+      className="ml-2 inline-flex min-w-5 items-center justify-center rounded-full bg-destructive px-1.5 text-xs font-semibold leading-5 text-destructive-foreground"
+    >
+      {data.length}
+    </span>
+  );
+}

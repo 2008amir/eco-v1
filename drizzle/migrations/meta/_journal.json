@@ -85,6 +85,20 @@
       "when": 1790546695113,
       "tag": "0011_require_admin_approval_for_registration_payment",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1794949990351,
+      "tag": "0012_keep_verified_members_out_of_onboarding",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1794950334545,
+      "tag": "0013_lock_complete_verified_registration_progress",
+      "breakpoints": true
     }
   ]
 }

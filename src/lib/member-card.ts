@@ -260,7 +260,7 @@ export async function downloadIdCardPdf({ profile, positionName, memberNo, qr, a
   doc.text("SCAN FOR", 18.1, 43.6); doc.text("VERIFICATION", 18.1, 47.3);
   const signature = await signatureInkDataUrl(p.signature_data ? String(p.signature_data) : null);
   if (signature) {
-    try { doc.addImage(signature, "PNG", 49.2, 39.1, 32.5, 9.1); } catch { /* use name below */ }
+    try { doc.addImage(signature, "PNG", 49.2, H * 0.895 - 9.1, 32.5, 9.1); } catch { /* use name below */ }
   } else {
     doc.setFont("times", "italic"); doc.setFontSize(8); doc.text(String(fullName || "Signature").slice(0, 28), 65.5, 47.5, { align: "center" });
   }

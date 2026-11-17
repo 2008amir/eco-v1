@@ -1,3 +1,9 @@
+- [x] Prevent onboarding from reopening after admin verifies registration payment.
+- [x] Show an inline receipt-required error when payment is submitted without proof.
+- [x] Show pending payment counts on registration and monthly revenue tabs.
+- [x] Add a secure delete-user action to the administrator's user detail screen.
+- [x] Align the ID-card signature rule with the form signature line.
+- [x] Fix profile avatar upload display; signed-in end-to-end upload verification is still required.
 - [x] Show PDF pages directly in the form preview on mobile.
 - [x] Keep every non-admin in registration/payment review until form is complete and admin verifies payment, including after returning.
 - [ ] Add admin user actions: permanently delete account for fresh signup, suspend/return, and ban with distinct sign-in messages. Implemented; authenticated administrator verification waits for a preview sign-in.

@@ -17,6 +17,5 @@ export function isRegistrationComplete(profile: Profile | null) {
     && (profile.is_graduate ? Boolean(profile.graduation_year?.trim()) : Boolean(profile.school_level?.trim()))
     && Boolean(profile.policy_accepted_at)
     && Boolean(profile.registered_at && profile.member_no)
-    && profile.registration_payment_verified === true
-    && (profile.onboarding_step ?? 0) >= 6;
+    && profile.registration_payment_verified === true;
 }

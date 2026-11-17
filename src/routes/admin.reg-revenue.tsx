@@ -1,9 +1,9 @@
-import { createFileRoute } from "@tanstack/react-router";
+import { createFileRoute, Link } from "@tanstack/react-router";
 import { useQuery } from "@tanstack/react-query";
 import { supabase } from "@/integrations/supabase/client";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { PaymentPlan } from "@/components/admin/PaymentPlan";
-import { AwaitingVerification } from "@/components/admin/AwaitingVerification";
+import { AwaitingVerification, AwaitingVerificationCount } from "@/components/admin/AwaitingVerification";
 
 export const Route = createFileRoute("/admin/reg-revenue")({ component: RegRevenue });
 
@@ -26,12 +26,12 @@ function RegisteredUsers() {
   return (
     <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
       {rows.map((u) => (
-        <div key={u.id} className="glass rounded-xl p-4">
+        <Link key={u.id} to="/admin/users/$userId" params={{ userId: u.id }} className="glass rounded-xl p-4 block hover:ring-1 hover:ring-primary transition">
           <div className="font-semibold">{[u.first_name, u.last_name].filter(Boolean).join(" ") || `@${u.username}`}</div>
           <div className="text-sm text-muted-foreground">{u.phone || "No phone"}</div>
           <div className="text-xs text-muted-foreground mt-1">{u.positions?.name ?? "Member"} · {u.member_no ?? "—"}</div>
           {u.is_revoked && <div className="text-xs text-destructive mt-1">Revoked</div>}
-        </div>
+        </Link>
       ))}
       {rows.length === 0 && <p className="text-sm text-muted-foreground">No registered users yet.</p>}
     </div>
@@ -46,7 +46,7 @@ function RegRevenue() {
         <TabsList>
           <TabsTrigger value="registered">Registered users</TabsTrigger>
           <TabsTrigger value="plan">Payment plan</TabsTrigger>
-          <TabsTrigger value="awaiting">Awaiting verification</TabsTrigger>
+          <TabsTrigger value="awaiting">Awaiting verification<AwaitingVerificationCount kind="registration" /></TabsTrigger>
         </TabsList>
         <TabsContent value="registered" className="mt-4"><RegisteredUsers /></TabsContent>
         <TabsContent value="plan" className="mt-4"><PaymentPlan field="reg_amount" /></TabsContent>

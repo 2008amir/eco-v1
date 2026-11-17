@@ -5,6 +5,7 @@ import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { uploadWithSupabaseRetry } from "@/lib/supabase-retry";
 import { formatAmount, usePaymentAccount } from "@/lib/membership";
+import { hasPaymentProof } from "@/lib/payment-validation";
 
 type Props = {
   userId: string;
@@ -21,23 +22,26 @@ export function PaymentStep({ userId, amount, kind, positionId, period, title, i
   const { data: account } = usePaymentAccount();
   const [showAccount, setShowAccount] = useState(false);
   const [file, setFile] = useState<File | null>(null);
+  const [receiptError, setReceiptError] = useState(false);
   const [busy, setBusy] = useState(false);
 
   const submit = async () => {
+    if (!hasPaymentProof(file)) {
+      setReceiptError(true);
+      return;
+    }
     setBusy(true);
     let receiptPath: string | null = null;
-    if (file) {
-      const ext = file.name.split(".").pop();
-      const path = `${userId}/receipt-${Date.now()}.${ext}`;
-      const { error } = await uploadWithSupabaseRetry("receipts", path, file, { contentType: file.type, upsert: true }, 4);
-      if (error) { toast.error(error.message); setBusy(false); return; }
-      receiptPath = path;
-    }
-    const { error } = await supabase.from("payments").insert({
+    const ext = file.name.split(".").pop();
+    const path = `${userId}/receipt-${Date.now()}.${ext}`;
+    const { error } = await uploadWithSupabaseRetry("receipts", path, file, { contentType: file.type, upsert: true }, 4);
+    if (error) { toast.error(error.message); setBusy(false); return; }
+    receiptPath = path;
+    const { error: paymentError } = await supabase.from("payments").insert({
       user_id: userId, kind, position_id: positionId ?? null, amount,
       receipt_url: receiptPath, period: period ?? null, status: "pending",
     } as never);
-    if (error) { toast.error(error.message); setBusy(false); return; }
+    if (paymentError) { toast.error(paymentError.message); setBusy(false); return; }
     await onSubmitted();
     setBusy(false);
   };
@@ -71,8 +75,9 @@ export function PaymentStep({ userId, amount, kind, positionId, period, title, i
           <label className="inline-flex items-center gap-2 px-3 py-2 rounded-md glass cursor-pointer hover:bg-muted/50 text-sm">
             <Upload className="h-4 w-4" />
             {file ? file.name : "Upload payment receipt"}
-            <input type="file" accept="image/*,application/pdf" className="hidden" onChange={(e) => setFile(e.target.files?.[0] ?? null)} />
+            <input type="file" accept="image/*,application/pdf" className="hidden" onChange={(e) => { setFile(e.target.files?.[0] ?? null); setReceiptError(false); }} />
           </label>
+          {receiptError && <p role="alert" className="text-sm font-medium text-destructive">Upload a payment proof before you continue.</p>}
 
           <Button onClick={submit} disabled={busy} className="w-full gradient-bg text-primary-foreground hover:opacity-90">
             {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}I have made the payment

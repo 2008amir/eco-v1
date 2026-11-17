@@ -88,7 +88,8 @@ function Onboarding() {
   const [busy, setBusy] = useState(false);
 
   const formComplete = isRegistrationComplete(profile);
-  const step = formComplete ? 6 : profile?.registered_at && profile?.member_no && profile?.registration_payment_verified ? 0 : Math.min(profile?.onboarding_step ?? 0, 3);
+  const paymentAlreadyVerified = profile?.registration_payment_verified === true;
+  const step = formComplete ? 6 : paymentAlreadyVerified ? 0 : Math.min(profile?.onboarding_step ?? 0, 3);
   const memberPosition = positions.find((p) => p.is_member);
 
   const { data: latestPayment, isError: paymentError } = useQuery({
