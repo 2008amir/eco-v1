@@ -95,28 +95,11 @@ function CommunityRequestsPage() {
   });
 
   const resolveRequest = async (reqId: string, status: "approved" | "declined") => {
-    const { data, error } = await supabase
-      .from("community_join_requests")
-      .update({ status })
-      .eq("id", reqId)
-      .select("id, community_id, user_id, status")
-      .maybeSingle();
+    const { error } = await supabase.from("community_join_requests").update({ status }).eq("id", reqId);
     if (error) { toast.error(error.message); return; }
-    if (!data || data.status !== status) { toast.error("The request was not updated. Please try again."); return; }
-    if (status === "approved") {
-      const { data: membership, error: membershipError } = await supabase
-        .from("community_members")
-        .select("id")
-        .eq("community_id", data.community_id)
-        .eq("user_id", data.user_id)
-        .maybeSingle();
-      if (membershipError) { toast.error(membershipError.message); return; }
-      if (!membership) { toast.error("The request was approved, but the member was not added. Please try again."); return; }
-    }
     toast.success(status === "approved" ? "Request approved" : "Request declined");
     qc.invalidateQueries({ queryKey: ["community-requests", id] });
     qc.invalidateQueries({ queryKey: ["community-members", id] });
-    qc.invalidateQueries({ queryKey: ["my-communities"] });
   };
 
   if (isLoading || membershipLoading) {

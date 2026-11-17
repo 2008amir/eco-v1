@@ -1,4 +1,3 @@
 - [x] Show PDF pages directly in the form preview on mobile.
 - [x] Keep every non-admin in registration/payment review until form is complete and admin verifies payment, including after returning.
 - [ ] Add admin user actions: permanently delete account for fresh signup, suspend/return, and ban with distinct sign-in messages. Implemented; authenticated administrator verification waits for a preview sign-in.
-- [ ] Verify group member add, remove, promote, and demote with a signed-in owner account; preview verification is blocked until a session is available. Database permissions and saved-result checks are in place.
