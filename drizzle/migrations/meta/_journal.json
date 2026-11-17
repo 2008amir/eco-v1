@@ -85,6 +85,20 @@
       "when": 1790546695113,
       "tag": "0011_require_admin_approval_for_registration_payment",
       "breakpoints": true
+    },
+    {
+      "idx": 12,
+      "version": "7",
+      "when": 1794922308764,
+      "tag": "0012_fix_community_member_management",
+      "breakpoints": true
+    },
+    {
+      "idx": 13,
+      "version": "7",
+      "when": 1794922404968,
+      "tag": "0013_allow_group_owners_to_view_members",
+      "breakpoints": true
     }
   ]
 }

@@ -68,6 +68,7 @@ function CommunityPage() {
   const [showInfo, setShowInfo] = useState(false);
   const [createOpen, setCreateOpen] = useState(false);
   const [memberSearch, setMemberSearch] = useState("");
+  const [addMemberSearch, setAddMemberSearch] = useState("");
   const [uploadingCover, setUploadingCover] = useState(false);
   const fileInput = useRef<HTMLInputElement>(null);
   const coverInput = useRef<HTMLInputElement>(null);
@@ -118,6 +119,7 @@ function CommunityPage() {
   // Groups created by a site admin (and the general group) are owned by every site admin.
   const adminOwned = isGeneral || !ownerId || adminIds.includes(ownerId);
   const isOwner = !!user && (adminOwned ? isAdmin || ownerId === user.id : ownerId === user.id);
+  const canManageMembers = isOwner || isCommunityAdmin;
   const isOwnerUser = (uid: string) => (adminOwned ? adminIds.includes(uid) : uid === ownerId);
   const membersCanPost = (community as any)?.members_can_post !== false;
   const canPost = isMember && (membersCanPost || isCommunityAdmin);
@@ -254,8 +256,9 @@ function CommunityPage() {
   const join = async () => {
     if (!user || !community) return;
     if (community.visibility === "public") {
-      const { error } = await supabase.from("community_members").insert({ community_id: id, user_id: user.id, role: "member" });
+      const { data, error } = await supabase.from("community_members").insert({ community_id: id, user_id: user.id, role: "member" }).select("id").maybeSingle();
       if (error) { toast.error(error.message); return; }
+      if (!data) { toast.error("You could not be added to this community. Please try again."); return; }
       toast.success("You joined this community");
       qc.invalidateQueries({ queryKey: ["community-members", id] });
       qc.invalidateQueries({ queryKey: ["my-communities"] });
@@ -267,12 +270,63 @@ function CommunityPage() {
     }
   };
 
+  const { data: addableMembers = [] } = useQuery({
+    queryKey: ["community-addable-members", id, addMemberSearch.trim().toLowerCase()],
+    enabled: canManageMembers && addMemberSearch.trim().length >= 2,
+    queryFn: async () => {
+      const search = addMemberSearch.trim();
+      const { data, error } = await supabase
+        .from("profiles")
+        .select("id, first_name, last_name, username, avatar_url")
+        .ilike("username", `%${search}%`)
+        .limit(8);
+      if (error) throw error;
+      return ((data ?? []) as (ProfileLite & { id: string })[])
+        .filter((profile) => !members.some((member) => member.user_id === profile.id));
+    },
+  });
+
+  const addMember = async (profile: ProfileLite & { id: string }) => {
+    const { data, error } = await supabase
+      .from("community_members")
+      .insert({ community_id: id, user_id: profile.id, role: "member" })
+      .select("id")
+      .maybeSingle();
+    if (error) { toast.error(error.message); return; }
+    if (!data) { toast.error("The member was not added. Please try again."); return; }
+    setAddMemberSearch("");
+    await Promise.all([
+      qc.invalidateQueries({ queryKey: ["community-members", id] }),
+      qc.invalidateQueries({ queryKey: ["my-communities"] }),
+    ]);
+    toast.success("Member added to the community");
+  };
+
+  const removeMember = async (member: Member) => {
+    const name = `${member.profiles?.first_name ?? ""} ${member.profiles?.last_name ?? ""}`.trim() || member.profiles?.username || "this member";
+    if (!window.confirm(`Remove ${name} from this community?`)) return;
+    const { data, error } = await supabase
+      .from("community_members")
+      .delete()
+      .eq("id", member.id)
+      .select("id")
+      .maybeSingle();
+    if (error) { toast.error(error.message); return; }
+    if (!data) { toast.error("The member was not removed. Please try again."); return; }
+    await Promise.all([
+      qc.invalidateQueries({ queryKey: ["community-members", id] }),
+      qc.invalidateQueries({ queryKey: ["my-communities"] }),
+    ]);
+    toast.success("Member removed from the community");
+  };
+
   const promote = async (m: Member) => {
     const next = m.role === "admin" ? "member" : "admin";
-    const { error } = await supabase.from("community_members").update({ role: next }).eq("id", m.id);
+    const { data, error } = await supabase.from("community_members").update({ role: next }).eq("id", m.id).select("id, role").maybeSingle();
     if (error) { toast.error(error.message); return; }
+    if (!data || data.role !== next) { toast.error("The member’s role was not changed. Please try again."); return; }
+    await qc.invalidateQueries({ queryKey: ["community-members", id] });
     toast.success(next === "admin" ? "Promoted to community admin" : "Changed to member");
-    qc.invalidateQueries({ queryKey: ["community-members", id] });
   };
 
   const coverUrl = useStorageUrl("community-images", community?.cover_image_url ?? null);
@@ -465,6 +519,31 @@ function CommunityPage() {
 
               <div className="glass rounded-2xl p-4">
                 <h3 className="font-semibold text-sm flex items-center gap-1.5"><Users className="h-4 w-4 text-primary" /> Members ({members.length})</h3>
+                {canManageMembers && (
+                  <div className="mt-3 space-y-2">
+                    <Input
+                      value={addMemberSearch}
+                      onChange={(e) => setAddMemberSearch(e.target.value)}
+                      placeholder="Add by username…"
+                      aria-label="Search for a member to add by username"
+                      className="glass h-9"
+                    />
+                    {addMemberSearch.trim().length >= 2 && (
+                      <ul className="space-y-1">
+                        {addableMembers.map((profile) => {
+                          const name = `${profile.first_name ?? ""} ${profile.last_name ?? ""}`.trim() || profile.username || "Member";
+                          return (
+                            <li key={profile.id} className="flex items-center justify-between gap-2 rounded-md border border-border p-2">
+                              <span className="min-w-0 truncate text-sm">{name}{profile.username ? ` · @${profile.username}` : ""}</span>
+                              <Button size="sm" variant="outline" className="h-7 shrink-0" onClick={() => addMember(profile)}>Add</Button>
+                            </li>
+                          );
+                        })}
+                        {addableMembers.length === 0 && <li className="p-2 text-xs text-muted-foreground">No available members found.</li>}
+                      </ul>
+                    )}
+                  </div>
+                )}
                 <Input
                   value={memberSearch}
                   onChange={(e) => setMemberSearch(e.target.value)}
@@ -479,6 +558,8 @@ function CommunityPage() {
                       isOwnerRow={isOwnerUser(m.user_id)}
                       canPromote={isOwner && m.user_id !== user?.id && !isOwnerUser(m.user_id)}
                       onPromote={() => promote(m)}
+                      canRemove={canManageMembers && m.user_id !== user?.id && !isOwnerUser(m.user_id)}
+                      onRemove={() => removeMember(m)}
                     />
                   ))}
                   {filteredMembers.length === 0 && <li className="text-xs text-muted-foreground p-2">No members found.</li>}
@@ -566,7 +647,7 @@ function CommunityPage() {
   );
 }
 
-function MemberRow({ m, canPromote, onPromote, isOwnerRow }: { m: Member; canPromote: boolean; onPromote: () => void; isOwnerRow?: boolean }) {
+function MemberRow({ m, canPromote, onPromote, canRemove, onRemove, isOwnerRow }: { m: Member; canPromote: boolean; onPromote: () => void; canRemove: boolean; onRemove: () => void; isOwnerRow?: boolean }) {
   const avatar = useStorageUrl("avatars", m.profiles?.avatar_url ?? null);
   const name = `${m.profiles?.first_name ?? ""} ${m.profiles?.last_name ?? ""}`.trim() || m.profiles?.username || "Member";
   const initials = name.slice(0, 2).toUpperCase();
@@ -588,6 +669,11 @@ function MemberRow({ m, canPromote, onPromote, isOwnerRow }: { m: Member; canPro
       {canPromote && (
         <Button variant="ghost" size="sm" className="h-7 px-2 text-[11px]" onClick={onPromote}>
           {m.role === "admin" ? "Demote" : "Promote"}
+        </Button>
+      )}
+      {canRemove && (
+        <Button variant="ghost" size="sm" className="h-7 px-2 text-[11px] text-destructive" onClick={onRemove} aria-label={`Remove ${name} from community`}>
+          Remove
         </Button>
       )}
     </li>
