@@ -20,8 +20,13 @@ export async function getStorageUrl(bucket: string, value?: string | null, expir
   const path = toStoragePath(bucket, value);
   // External URL (e.g. OAuth avatar) — use as-is.
   if (!path) return value;
-  const { data } = await supabase.storage.from(bucket).createSignedUrl(path, expiresIn);
-  return data?.signedUrl ?? null;
+  // Retry: the first request after the backend wakes up can fail.
+  for (let attempt = 0; attempt < 4; attempt++) {
+    const { data } = await supabase.storage.from(bucket).createSignedUrl(path, expiresIn);
+    if (data?.signedUrl) return data.signedUrl;
+    await new Promise((r) => setTimeout(r, 600 * (attempt + 1)));
+  }
+  return null;
 }
 
 export function useStorageUrl(bucket: string, value?: string | null) {

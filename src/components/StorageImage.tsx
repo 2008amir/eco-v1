@@ -1,4 +1,5 @@
-import type { ImgHTMLAttributes } from "react";
+import { useState, type ImgHTMLAttributes } from "react";
+import { ImageOff } from "lucide-react";
 import { useStorageUrl } from "@/lib/storage-url";
 
 type StorageImageProps = Omit<ImgHTMLAttributes<HTMLImageElement>, "src"> & {
@@ -6,10 +7,17 @@ type StorageImageProps = Omit<ImgHTMLAttributes<HTMLImageElement>, "src"> & {
   path?: string | null;
 };
 
-export function StorageImage({ bucket, path, alt = "", ...props }: StorageImageProps) {
+export function StorageImage({ bucket, path, alt = "", className, ...props }: StorageImageProps) {
   const url = useStorageUrl(bucket, path);
+  const [failed, setFailed] = useState<string | null>(null);
 
-  if (!url) return null;
+  if (!url || failed === url) {
+    return (
+      <div className={`${className ?? ""} flex items-center justify-center bg-muted text-muted-foreground`}>
+        <ImageOff className="h-1/3 w-1/3" />
+      </div>
+    );
+  }
 
-  return <img src={url} alt={alt} {...props} />;
+  return <img src={url} alt={alt} className={className} onError={() => setFailed(url)} {...props} />;
 }
