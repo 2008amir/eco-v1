@@ -62,7 +62,7 @@ import { PolicyView } from "@/components/PolicyView";
 import { PaymentStep } from "@/components/PaymentStep";
 import { MembershipPrintSheet } from "@/components/MembershipPrintSheet";
 import { usePositions } from "@/lib/membership";
-import { isRegistrationComplete } from "@/lib/registration";
+import { isRegistrationComplete, isRegistrationFormComplete } from "@/lib/registration";
 
 export const Route = createFileRoute("/onboarding")({
   component: () => <RequireAuth skipOnboarding><Onboarding /></RequireAuth>,
@@ -88,6 +88,7 @@ function Onboarding() {
   const [busy, setBusy] = useState(false);
 
   const formComplete = isRegistrationComplete(profile);
+  const formFieldsComplete = isRegistrationFormComplete(profile);
   const paymentAlreadyVerified = profile?.registration_payment_verified === true;
   const step = formComplete ? 6 : paymentAlreadyVerified ? 0 : Math.min(profile?.onboarding_step ?? 0, 3);
   const memberPosition = positions.find((p) => p.is_member);
@@ -175,11 +176,13 @@ function Onboarding() {
           <>
             <div className="glass-strong rounded-2xl p-5">
               <h1 className="text-2xl font-bold gradient-text">Complete your registration</h1>
-              <p className="text-sm text-muted-foreground mt-2">
-                Please fill the following form so the organization can verify you. Use your real details — they appear on your membership form and ID card.
-              </p>
+              {paymentAlreadyVerified ? (
+                <p className="text-sm text-muted-foreground mt-2">Your payment is approved. Complete the missing membership details below once, then continue to your dashboard.</p>
+              ) : (
+                <p className="text-sm text-muted-foreground mt-2">Please fill the following form so the organization can verify you. Use your real details — they appear on your membership form and ID card.</p>
+              )}
             </div>
-            <MemberForm form={form} onChange={(k, v) => setForm((f) => ({ ...f, [k]: v }))}
+            <MemberForm form={formFieldsComplete ? form : form} onChange={(k, v) => setForm((f) => ({ ...f, [k]: v }))}
               signature={signature} onSignatureChange={setSignature} email={user.email ?? ""}
               positionName={positionName} memberNo={memberNo} />
             <p className="text-xs text-muted-foreground text-center">

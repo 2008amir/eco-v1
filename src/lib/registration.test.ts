@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isRegistrationComplete } from "./registration";
+import { isRegistrationComplete, isRegistrationFormComplete } from "./registration";
 import type { Profile } from "./auth-context";
 
 const completeProfile = {
@@ -63,7 +63,13 @@ describe("isRegistrationComplete", () => {
   });
 
   it("keeps required form fields mandatory while allowing the three optional details to be blank", () => {
-    expect(isRegistrationComplete(profileWith({ last_name: null, address_line2: null, address_line3: null }))).toBe(true);
+    expect(isRegistrationComplete(profileWith({ last_name: undefined, address_line2: null, address_line3: null }))).toBe(true);
     expect(isRegistrationComplete(profileWith({ middle_name: "" }))).toBe(false);
+  });
+
+  it("recognizes when a verified member still needs to finish required profile details", () => {
+    const incomplete = profileWith({ gender: undefined, registration_payment_verified: true });
+    expect(isRegistrationFormComplete(incomplete)).toBe(false);
+    expect(isRegistrationComplete(incomplete)).toBe(false);
   });
 });

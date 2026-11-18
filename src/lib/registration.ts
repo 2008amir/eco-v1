@@ -9,12 +9,17 @@ const REQUIRED_FIELDS = [
   "id_phone", "signature_data",
 ] as const;
 
-export function isRegistrationComplete(profile: Profile | null) {
+export function isRegistrationFormComplete(profile: Profile | null) {
   if (!profile) return false;
   const fields = profile as unknown as Record<string, unknown>;
   return REQUIRED_FIELDS.every((field) => String(fields[field] ?? "").trim() !== "")
     && profile.is_graduate !== null && profile.is_graduate !== undefined
-    && (profile.is_graduate ? Boolean(profile.graduation_year?.trim()) : Boolean(profile.school_level?.trim()))
+    && (profile.is_graduate ? Boolean(profile.graduation_year?.trim()) : Boolean(profile.school_level?.trim()));
+}
+
+export function isRegistrationComplete(profile: Profile | null) {
+  if (!profile) return false;
+  return isRegistrationFormComplete(profile)
     && Boolean(profile.policy_accepted_at)
     && Boolean(profile.registered_at && profile.member_no)
     && profile.registration_payment_verified === true;

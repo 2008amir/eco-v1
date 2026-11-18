@@ -3,7 +3,8 @@
 - [x] Show pending payment counts on registration and monthly revenue tabs.
 - [x] Add a secure delete-user action to the administrator's user detail screen.
 - [x] Align the ID-card signature rule with the form signature line.
-- [x] Fix profile avatar upload display; signed-in end-to-end upload verification is still required.
+- [x] Show an immediate profile avatar preview and preserve the saved photo path.
+- [ ] Verify avatar storage, admin payment badges, and account deletion with an authenticated preview session; blocked because no safe signed-in test session is available.
 - [x] Show PDF pages directly in the form preview on mobile.
 - [x] Keep every non-admin in registration/payment review until form is complete and admin verifies payment, including after returning.
-- [ ] Add admin user actions: permanently delete account for fresh signup, suspend/return, and ban with distinct sign-in messages. Implemented; authenticated administrator verification waits for a preview sign-in.
+- [x] Add admin user actions: permanently delete account for fresh signup, suspend/return, and ban with distinct sign-in messages.
