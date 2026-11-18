@@ -177,12 +177,16 @@ function Onboarding() {
             <div className="glass-strong rounded-2xl p-5">
               <h1 className="text-2xl font-bold gradient-text">Complete your registration</h1>
               {paymentAlreadyVerified ? (
-                <p className="text-sm text-muted-foreground mt-2">Your payment is approved. Complete the missing membership details below once, then continue to your dashboard.</p>
+                <p className="text-sm text-muted-foreground mt-2">
+                  {formFieldsComplete
+                    ? "Your payment is approved. Complete the remaining registration steps to continue to your dashboard."
+                    : "Your payment is approved. Complete the missing membership details below once, then continue to your dashboard."}
+                </p>
               ) : (
                 <p className="text-sm text-muted-foreground mt-2">Please fill the following form so the organization can verify you. Use your real details — they appear on your membership form and ID card.</p>
               )}
             </div>
-            <MemberForm form={formFieldsComplete ? form : form} onChange={(k, v) => setForm((f) => ({ ...f, [k]: v }))}
+            <MemberForm form={form} onChange={(k, v) => setForm((f) => ({ ...f, [k]: v }))}
               signature={signature} onSignatureChange={setSignature} email={user.email ?? ""}
               positionName={positionName} memberNo={memberNo} />
             <p className="text-xs text-muted-foreground text-center">
