@@ -1,9 +1,9 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState, type ChangeEvent } from "react";
 
 // Survives the step being redrawn (e.g. when the phone returns from the file picker).
 const pickedFiles = new Map<string, File>();
 import { Button } from "@/components/ui/button";
-import { Check, Loader2, Upload } from "lucide-react";
+import { Camera, Check, FileText, Image as ImageIcon, Loader2, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { uploadWithSupabaseRetry } from "@/lib/supabase-retry";
@@ -42,6 +42,16 @@ export function PaymentStep({ userId, amount, kind, positionId, period, title, i
   const pathKey = `${storeKey}:receipt`;
   const [uploaded, setUploaded] = useState<{ path: string; name: string } | null>(null);
   const [uploading, setUploading] = useState(false);
+  const [chooserOpen, setChooserOpen] = useState(false);
+  const cameraRef = useRef<HTMLInputElement>(null);
+  const galleryRef = useRef<HTMLInputElement>(null);
+  const filesRef = useRef<HTMLInputElement>(null);
+  const onPicked = (e: ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    e.target.value = "";
+    setChooserOpen(false);
+    if (f) void uploadPicked(f);
+  };
   useEffect(() => {
     try { const v = sessionStorage.getItem(pathKey); if (v) setUploaded(JSON.parse(v)); } catch { /* ignore */ }
   }, [pathKey]);
@@ -108,11 +118,33 @@ export function PaymentStep({ userId, amount, kind, positionId, period, title, i
             <p className="text-sm text-muted-foreground">The organization has not added a payment account yet. Please check back shortly.</p>
           )}
 
-          <label className="inline-flex items-center gap-2 px-3 py-2 rounded-md glass cursor-pointer hover:bg-muted/50 text-sm">
-            {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : uploaded ? <Check className="h-4 w-4 text-primary" /> : <Upload className="h-4 w-4" />}
-            {uploading ? "Uploading…" : uploaded ? `${uploaded.name} — uploaded (tap to change)` : "Upload payment receipt"}
-            <input type="file" accept="image/*,application/pdf" className="sr-only" disabled={uploading} onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ""; if (f) void uploadPicked(f); }} />
-          </label>
+          <div className="space-y-2">
+            <button
+              type="button"
+              disabled={uploading}
+              onClick={() => setChooserOpen((v) => !v)}
+              className="inline-flex items-center gap-2 px-3 py-2 rounded-md glass hover:bg-muted/50 text-sm disabled:opacity-60"
+            >
+              {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : uploaded ? <Check className="h-4 w-4 text-primary" /> : <Upload className="h-4 w-4" />}
+              {uploading ? "Uploading…" : uploaded ? `${uploaded.name} — uploaded (tap to change)` : "Upload payment receipt"}
+            </button>
+            {chooserOpen && !uploading && (
+              <div className="grid grid-cols-3 gap-2">
+                <button type="button" onClick={() => cameraRef.current?.click()} className="flex flex-col items-center gap-1 rounded-md glass px-2 py-3 text-xs hover:bg-muted/50">
+                  <Camera className="h-5 w-5" />Camera
+                </button>
+                <button type="button" onClick={() => galleryRef.current?.click()} className="flex flex-col items-center gap-1 rounded-md glass px-2 py-3 text-xs hover:bg-muted/50">
+                  <ImageIcon className="h-5 w-5" />Photos
+                </button>
+                <button type="button" onClick={() => filesRef.current?.click()} className="flex flex-col items-center gap-1 rounded-md glass px-2 py-3 text-xs hover:bg-muted/50">
+                  <FileText className="h-5 w-5" />Files
+                </button>
+              </div>
+            )}
+            <input ref={cameraRef} type="file" accept="image/*" capture="environment" className="sr-only" tabIndex={-1} onChange={onPicked} />
+            <input ref={galleryRef} type="file" accept="image/*" className="sr-only" tabIndex={-1} onChange={onPicked} />
+            <input ref={filesRef} type="file" accept="image/*,application/pdf" className="sr-only" tabIndex={-1} onChange={onPicked} />
+          </div>
           {receiptError && <p role="alert" className="text-sm font-medium text-destructive">Upload a payment proof before you continue.</p>}
 
           <Button onClick={submit} disabled={busy || uploading} className="w-full gradient-bg text-primary-foreground hover:opacity-90">

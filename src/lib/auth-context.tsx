@@ -84,6 +84,10 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const [rolesError, setRolesError] = useState<string | null>(null);
   const loadRequestRef = useRef(0);
   const initializedRef = useRef(false);
+  // The user whose data is already on screen. Phones fire SIGNED_IN /
+  // TOKEN_REFRESHED when returning from the camera or file picker; reloading
+  // everything then unmounts open forms (and their pending file pickers).
+  const loadedUserIdRef = useRef<string | null>(null);
 
   const loadAuthStateWithRetry = async (requestId: number, currentUser: User, attempt = 0): Promise<void> => {
     const authStateResult = await loadAuthStateRequest();
@@ -120,8 +124,14 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   useEffect(() => {
     const applySession = (sess: Session | null, event?: AuthChangeEvent) => {
       if (event === "INITIAL_SESSION" && initializedRef.current) return;
+      if (sess?.user && loadedUserIdRef.current === sess.user.id) {
+        setSession(sess);
+        setUser((prev) => (prev?.id === sess.user.id ? prev : sess.user));
+        return;
+      }
       setSession(sess);
       setUser(sess?.user ?? null);
+      loadedUserIdRef.current = sess?.user?.id ?? null;
       if (sess?.user) {
         setRolesLoaded(false);
         setRolesError(null);
@@ -201,6 +211,7 @@ export function AuthProvider({ children }: { children: ReactNode }) {
   const signOut = async () => {
     await supabase.auth.signOut({ scope: "global" });
     loadRequestRef.current += 1;
+    loadedUserIdRef.current = null;
     setSession(null);
     setUser(null);
     setProfile(null);
