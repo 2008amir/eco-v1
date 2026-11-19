@@ -84,7 +84,20 @@ export async function signatureFrameDataUrl(source: string | null | undefined): 
       }
       if (!ink) { resolve(null); return; }
       context.putImageData(pixels, 0, 0);
-      resolve(canvas.toDataURL("image/png"));
+      // The card shows the pad at roughly a third of its size, so thicken the
+      // pen stroke evenly in every direction (keeps it on the same line).
+      const bold = document.createElement("canvas");
+      bold.width = canvas.width;
+      bold.height = canvas.height;
+      const boldContext = bold.getContext("2d");
+      if (!boldContext) { resolve(canvas.toDataURL("image/png")); return; }
+      const radius = 3;
+      for (let dx = -radius; dx <= radius; dx += 1) {
+        for (let dy = -radius; dy <= radius; dy += 1) {
+          if (dx * dx + dy * dy <= radius * radius) boldContext.drawImage(canvas, dx, dy);
+        }
+      }
+      resolve(bold.toDataURL("image/png"));
     };
     image.onerror = () => resolve(source);
     image.src = source;

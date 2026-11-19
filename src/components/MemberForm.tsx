@@ -101,7 +101,7 @@ export function MemberForm({ form, onChange, signature, onSignatureChange, email
         <Field label="Middle name"><Input value={form.middle_name} onChange={(e) => onChange("middle_name", e.target.value)} className="glass" /></Field>
         <Field label="Phone number"><Input value={form.phone} onChange={(e) => onChange("phone", e.target.value)} className="glass" /></Field>
         <Field label="Gender">
-          <Select value={form.gender} onValueChange={(v) => onChange("gender", v)}>
+          <Select value={form.gender} onValueChange={(v) => { if (v) onChange("gender", v); }}>
             <SelectTrigger className="glass w-full"><SelectValue placeholder="Select gender" /></SelectTrigger>
             <SelectContent>{GENDERS.map((g) => <SelectItem key={g} value={g}>{g}</SelectItem>)}</SelectContent>
           </Select>
@@ -126,13 +126,13 @@ export function MemberForm({ form, onChange, signature, onSignatureChange, email
         <Field label="Institution"><Input value={form.institution} onChange={(e) => onChange("institution", e.target.value)} className="glass" /></Field>
         <Field label="Course of study"><Input value={form.course_of_study} onChange={(e) => onChange("course_of_study", e.target.value)} className="glass" /></Field>
         <Field label="Program of study">
-          <Select value={form.program_of_study} onValueChange={(v) => onChange("program_of_study", v)}>
+          <Select value={form.program_of_study} onValueChange={(v) => { if (v) onChange("program_of_study", v); }}>
             <SelectTrigger className="glass w-full"><SelectValue placeholder="Select program" /></SelectTrigger>
             <SelectContent>{PROGRAMS.map((p) => <SelectItem key={p} value={p}>{p}</SelectItem>)}</SelectContent>
           </Select>
         </Field>
         <Field label="Graduated?">
-          <Select value={form.is_graduate} onValueChange={(v) => onChange("is_graduate", v)}>
+          <Select value={form.is_graduate} onValueChange={(v) => { if (v) onChange("is_graduate", v); }}>
             <SelectTrigger className="glass w-full"><SelectValue placeholder="Select" /></SelectTrigger>
             <SelectContent>
               <SelectItem value="yes">Yes</SelectItem>
@@ -147,7 +147,7 @@ export function MemberForm({ form, onChange, signature, onSignatureChange, email
         )}
         {form.is_graduate === "no" && (
           <Field label="Level in school" full>
-            <Select value={form.school_level} onValueChange={(v) => onChange("school_level", v)}>
+            <Select value={form.school_level} onValueChange={(v) => { if (v) onChange("school_level", v); }}>
               <SelectTrigger className="glass w-full"><SelectValue placeholder="Select level" /></SelectTrigger>
               <SelectContent>{SCHOOL_LEVELS.map((l) => <SelectItem key={l} value={l}>{l}</SelectItem>)}</SelectContent>
             </Select>
@@ -171,7 +171,7 @@ export function MemberForm({ form, onChange, signature, onSignatureChange, email
       <Section index={6} title="ID card details">
         <Field label="Full name" full><Input value={form.id_full_name} onChange={(e) => onChange("id_full_name", e.target.value)} className="glass" /></Field>
         <Field label="Blood group">
-          <Select value={form.blood_group} onValueChange={(v) => onChange("blood_group", v)}>
+          <Select value={form.blood_group} onValueChange={(v) => { if (v) onChange("blood_group", v); }}>
             <SelectTrigger className="glass w-full"><SelectValue placeholder="Select blood group" /></SelectTrigger>
             <SelectContent>{BLOOD_GROUPS.map((b) => <SelectItem key={b} value={b}>{b}</SelectItem>)}</SelectContent>
           </Select>
