@@ -15,7 +15,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { PolicyView } from "@/components/PolicyView";
 import { MemberIdCard } from "@/components/MemberIdCard";
 import { FormPdfPreview } from "@/components/FormPdfPreview";
-import formTemplate from "@/assets/personal-information-form.pdf.asset.json";
+import { FORM_TEMPLATE_URL } from "@/lib/form-template";
 
 export const Route = createFileRoute("/id-card")({
   component: () => <RequireAuth><IdCardPage /></RequireAuth>,
@@ -153,7 +153,7 @@ function IdCardPage() {
 
               {!verified && (
                 <>
-                  <FormPdfPreview url={formTemplate.url} />
+                  <FormPdfPreview url={FORM_TEMPLATE_URL} />
                   <Button onClick={onForm} disabled={!qr || busy !== null} className="gradient-bg text-primary-foreground hover:opacity-90">
                     {busy === "form" ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <Download className="mr-2 h-4 w-4" />}Download form
                   </Button>

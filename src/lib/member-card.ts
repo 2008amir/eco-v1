@@ -4,7 +4,7 @@ import { PDFDocument, StandardFonts, rgb } from "pdf-lib";
 import logoSrc from "@/assets/id-card-logo.png";
 import frontTemplate from "@/assets/id-card-front-template-v2.png";
 import backTemplate from "@/assets/id-card-back-template-v2.png";
-import formTemplate from "@/assets/personal-information-form.pdf.asset.json";
+import { FORM_TEMPLATE_URLS } from "@/lib/form-template";
 import { ID_CARD_DEFAULT_POLICY } from "@/lib/org-policy";
 
 export const QR_BASE = "https://workes.ecomedic.me/qr/rer";
@@ -189,7 +189,8 @@ async function fetchTemplateBytes(): Promise<ArrayBuffer> {
   let lastError: unknown = null;
   for (let attempt = 0; attempt < 4; attempt += 1) {
     try {
-      const response = await fetch(formTemplate.url, { cache: attempt === 0 ? "default" : "reload" });
+      const url = FORM_TEMPLATE_URLS[attempt % FORM_TEMPLATE_URLS.length];
+      const response = await fetch(url, { cache: attempt === 0 ? "default" : "reload" });
       if (!response.ok) throw new Error(`HTTP ${response.status}`);
       const bytes = await response.arrayBuffer();
       if (bytes.byteLength > 0) return bytes;
