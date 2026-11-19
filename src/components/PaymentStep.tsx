@@ -1,4 +1,7 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
+
+// Survives the step being redrawn (e.g. when the phone returns from the file picker).
+const pickedFiles = new Map<string, File>();
 import { Button } from "@/components/ui/button";
 import { Loader2, Upload } from "lucide-react";
 import { toast } from "sonner";
@@ -20,8 +23,20 @@ type Props = {
 
 export function PaymentStep({ userId, amount, kind, positionId, period, title, intro, onSubmitted }: Props) {
   const { data: account } = usePaymentAccount();
-  const [showAccount, setShowAccount] = useState(false);
-  const [file, setFile] = useState<File | null>(null);
+  const storeKey = `payment-open:${userId}:${kind}:${period ?? ""}`;
+  const [showAccount, setShowAccountState] = useState(false);
+  const [file, setFileState] = useState<File | null>(() => pickedFiles.get(storeKey) ?? null);
+  useEffect(() => {
+    try { if (sessionStorage.getItem(storeKey) === "1") setShowAccountState(true); } catch { /* ignore */ }
+  }, [storeKey]);
+  const setShowAccount = (v: boolean) => {
+    setShowAccountState(v);
+    try { v ? sessionStorage.setItem(storeKey, "1") : sessionStorage.removeItem(storeKey); } catch { /* ignore */ }
+  };
+  const setFile = (f: File | null) => {
+    if (f) pickedFiles.set(storeKey, f); else pickedFiles.delete(storeKey);
+    setFileState(f);
+  };
   const [receiptError, setReceiptError] = useState(false);
   const [busy, setBusy] = useState(false);
 
@@ -42,6 +57,8 @@ export function PaymentStep({ userId, amount, kind, positionId, period, title, i
       receipt_url: receiptPath, period: period ?? null, status: "pending",
     } as never);
     if (paymentError) { toast.error(paymentError.message); setBusy(false); return; }
+    pickedFiles.delete(storeKey);
+    try { sessionStorage.removeItem(storeKey); } catch { /* ignore */ }
     await onSubmitted();
     setBusy(false);
   };
@@ -75,7 +92,7 @@ export function PaymentStep({ userId, amount, kind, positionId, period, title, i
           <label className="inline-flex items-center gap-2 px-3 py-2 rounded-md glass cursor-pointer hover:bg-muted/50 text-sm">
             <Upload className="h-4 w-4" />
             {file ? file.name : "Upload payment receipt"}
-            <input type="file" accept="image/*,application/pdf" className="hidden" onChange={(e) => { setFile(e.target.files?.[0] ?? null); setReceiptError(false); }} />
+            <input type="file" accept="image/*,application/pdf" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) setFile(f); setReceiptError(false); e.target.value = ""; }} />
           </label>
           {receiptError && <p role="alert" className="text-sm font-medium text-destructive">Upload a payment proof before you continue.</p>}
 

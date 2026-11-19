@@ -46,11 +46,12 @@ function Onboarding() {
   const step = formComplete ? 6 : paymentAlreadyVerified ? 0 : Math.min(profile?.onboarding_step ?? 0, 3);
   const memberPosition = positions.find((p) => p.is_member);
 
-  const { data: latestPayment, isError: paymentError } = useQuery({
+  const { data: latestPayment, isError: paymentError, isFetched: paymentEverLoaded } = useQuery({
     queryKey: ["my-registration-payment", user?.id, step],
     enabled: !!user && step >= 2 && step < 6,
     refetchInterval: 15_000,
-    refetchOnWindowFocus: true,
+    refetchOnWindowFocus: false,
+    placeholderData: (prev) => prev,
     queryFn: async () => {
       const { data, error } = await supabase.from("payments").select("*").eq("user_id", user!.id)
         .eq("kind", "registration").order("created_at", { ascending: false }).limit(1).maybeSingle();
@@ -174,11 +175,11 @@ function Onboarding() {
           <div className="glass-strong rounded-2xl p-8 text-center space-y-3"><Clock className="mx-auto h-10 w-10 text-primary" /><h1 className="text-xl font-semibold">Your payment is under review</h1><p className="text-sm text-muted-foreground">You can continue once an administrator approves your payment.</p><Button variant="outline" onClick={() => refreshProfile()}>Check again</Button></div>
         )}
 
-        {step === 2 && latestPayment === undefined && !paymentError && (
+        {step === 2 && latestPayment === undefined && !paymentError && !paymentEverLoaded && (
           <div className="flex justify-center py-10"><Loader2 className="h-6 w-6 animate-spin text-primary" /></div>
         )}
 
-        {step === 2 && (latestPayment !== undefined || paymentError) && latestPayment?.status !== "pending" && latestPayment?.status !== "verified" && (
+        {step === 2 && (latestPayment !== undefined || paymentError || paymentEverLoaded) && latestPayment?.status !== "pending" && latestPayment?.status !== "verified" && (
           <PaymentStep
             userId={user.id}
             kind="registration"
