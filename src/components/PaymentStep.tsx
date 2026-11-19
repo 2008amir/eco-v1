@@ -3,7 +3,7 @@ import { useEffect, useState } from "react";
 // Survives the step being redrawn (e.g. when the phone returns from the file picker).
 const pickedFiles = new Map<string, File>();
 import { Button } from "@/components/ui/button";
-import { Loader2, Upload } from "lucide-react";
+import { Check, Loader2, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { supabase } from "@/integrations/supabase/client";
 import { uploadWithSupabaseRetry } from "@/lib/supabase-retry";
@@ -39,26 +39,45 @@ export function PaymentStep({ userId, amount, kind, positionId, period, title, i
   };
   const [receiptError, setReceiptError] = useState(false);
   const [busy, setBusy] = useState(false);
+  const pathKey = `${storeKey}:receipt`;
+  const [uploaded, setUploaded] = useState<{ path: string; name: string } | null>(null);
+  const [uploading, setUploading] = useState(false);
+  useEffect(() => {
+    try { const v = sessionStorage.getItem(pathKey); if (v) setUploaded(JSON.parse(v)); } catch { /* ignore */ }
+  }, [pathKey]);
+
+  // Upload as soon as the file is picked, so a page refresh afterwards loses nothing.
+  const uploadPicked = async (f: File) => {
+    setFile(f);
+    setReceiptError(false);
+    setUploading(true);
+    const ext = f.name.split(".").pop() || "jpg";
+    const path = `${userId}/receipt-${Date.now()}.${ext}`;
+    const { error } = await uploadWithSupabaseRetry("receipts", path, f, { contentType: f.type || undefined, upsert: true }, 4);
+    setUploading(false);
+    if (error) { toast.error(`Receipt upload failed: ${error.message}`); return; }
+    const info = { path, name: f.name };
+    setUploaded(info);
+    try { sessionStorage.setItem(pathKey, JSON.stringify(info)); sessionStorage.setItem(storeKey, "1"); } catch { /* ignore */ }
+    toast.success("Receipt uploaded");
+  };
 
   const submit = async () => {
-    if (!hasPaymentProof(file)) {
-      setReceiptError(true);
-      return;
+    if (uploading) return;
+    let receiptPath = uploaded?.path ?? null;
+    if (!receiptPath && hasPaymentProof(file)) {
+      await uploadPicked(file);
+      try { receiptPath = JSON.parse(sessionStorage.getItem(pathKey) ?? "null")?.path ?? null; } catch { receiptPath = null; }
     }
+    if (!receiptPath) { setReceiptError(true); return; }
     setBusy(true);
-    let receiptPath: string | null = null;
-    const ext = file.name.split(".").pop();
-    const path = `${userId}/receipt-${Date.now()}.${ext}`;
-    const { error } = await uploadWithSupabaseRetry("receipts", path, file, { contentType: file.type, upsert: true }, 4);
-    if (error) { toast.error(error.message); setBusy(false); return; }
-    receiptPath = path;
     const { error: paymentError } = await supabase.from("payments").insert({
       user_id: userId, kind, position_id: positionId ?? null, amount,
       receipt_url: receiptPath, period: period ?? null, status: "pending",
     } as never);
     if (paymentError) { toast.error(paymentError.message); setBusy(false); return; }
     pickedFiles.delete(storeKey);
-    try { sessionStorage.removeItem(storeKey); } catch { /* ignore */ }
+    try { sessionStorage.removeItem(storeKey); sessionStorage.removeItem(pathKey); } catch { /* ignore */ }
     await onSubmitted();
     setBusy(false);
   };
@@ -90,13 +109,13 @@ export function PaymentStep({ userId, amount, kind, positionId, period, title, i
           )}
 
           <label className="inline-flex items-center gap-2 px-3 py-2 rounded-md glass cursor-pointer hover:bg-muted/50 text-sm">
-            <Upload className="h-4 w-4" />
-            {file ? file.name : "Upload payment receipt"}
-            <input type="file" accept="image/*,application/pdf" className="hidden" onChange={(e) => { const f = e.target.files?.[0]; if (f) setFile(f); setReceiptError(false); e.target.value = ""; }} />
+            {uploading ? <Loader2 className="h-4 w-4 animate-spin" /> : uploaded ? <Check className="h-4 w-4 text-primary" /> : <Upload className="h-4 w-4" />}
+            {uploading ? "Uploading…" : uploaded ? `${uploaded.name} — uploaded (tap to change)` : "Upload payment receipt"}
+            <input type="file" accept="image/*,application/pdf" className="sr-only" disabled={uploading} onChange={(e) => { const f = e.target.files?.[0]; e.target.value = ""; if (f) void uploadPicked(f); }} />
           </label>
           {receiptError && <p role="alert" className="text-sm font-medium text-destructive">Upload a payment proof before you continue.</p>}
 
-          <Button onClick={submit} disabled={busy} className="w-full gradient-bg text-primary-foreground hover:opacity-90">
+          <Button onClick={submit} disabled={busy || uploading} className="w-full gradient-bg text-primary-foreground hover:opacity-90">
             {busy && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}I have made the payment
           </Button>
         </div>
