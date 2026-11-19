@@ -48,6 +48,7 @@ import { Route as AdminResearchNewRouteImport } from './routes/admin.research.ne
 import { Route as AdminResearchTemplatesRouteImport } from './routes/admin.research.templates'
 import { Route as AdminUsersUserIdRouteImport } from './routes/admin.users.$userId'
 import { Route as AdminResearchEditIdRouteImport } from './routes/admin.research.edit.$id'
+import { Route as ApiPublicPushSendRouteImport } from './routes/api/public/push/send'
 
 const IndexRoute = IndexRouteImport.update({
   id: '/',
@@ -244,6 +245,11 @@ const AdminResearchEditIdRoute = AdminResearchEditIdRouteImport.update({
   path: '/edit/$id',
   getParentRoute: () => AdminResearchRoute,
 } as any)
+const ApiPublicPushSendRoute = ApiPublicPushSendRouteImport.update({
+  id: '/api/public/push/send',
+  path: '/api/public/push/send',
+  getParentRoute: () => rootRouteImport,
+} as any)
 
 export interface FileRoutesByFullPath {
   '/': typeof IndexRoute
@@ -285,6 +291,7 @@ export interface FileRoutesByFullPath {
   '/admin/research/templates': typeof AdminResearchTemplatesRoute
   '/admin/users/$userId': typeof AdminUsersUserIdRoute
   '/admin/research/edit/$id': typeof AdminResearchEditIdRoute
+  '/api/public/push/send': typeof ApiPublicPushSendRoute
 }
 export interface FileRoutesByTo {
   '/': typeof IndexRoute
@@ -324,6 +331,7 @@ export interface FileRoutesByTo {
   '/admin/research/templates': typeof AdminResearchTemplatesRoute
   '/admin/users/$userId': typeof AdminUsersUserIdRoute
   '/admin/research/edit/$id': typeof AdminResearchEditIdRoute
+  '/api/public/push/send': typeof ApiPublicPushSendRoute
 }
 export interface FileRoutesById {
   __root__: typeof rootRouteImport
@@ -366,6 +374,7 @@ export interface FileRoutesById {
   '/admin/research/templates': typeof AdminResearchTemplatesRoute
   '/admin/users/$userId': typeof AdminUsersUserIdRoute
   '/admin/research/edit/$id': typeof AdminResearchEditIdRoute
+  '/api/public/push/send': typeof ApiPublicPushSendRoute
 }
 export interface FileRouteTypes {
   fileRoutesByFullPath: FileRoutesByFullPath
@@ -409,6 +418,7 @@ export interface FileRouteTypes {
     | '/admin/research/templates'
     | '/admin/users/$userId'
     | '/admin/research/edit/$id'
+    | '/api/public/push/send'
   fileRoutesByTo: FileRoutesByTo
   to:
     | '/'
@@ -448,6 +458,7 @@ export interface FileRouteTypes {
     | '/admin/research/templates'
     | '/admin/users/$userId'
     | '/admin/research/edit/$id'
+    | '/api/public/push/send'
   id:
     | '__root__'
     | '/'
@@ -489,6 +500,7 @@ export interface FileRouteTypes {
     | '/admin/research/templates'
     | '/admin/users/$userId'
     | '/admin/research/edit/$id'
+    | '/api/public/push/send'
   fileRoutesById: FileRoutesById
 }
 export interface RootRouteChildren {
@@ -511,6 +523,7 @@ export interface RootRouteChildren {
   CommunityIdRoute: typeof CommunityIdRoute
   QrRerRoute: typeof QrRerRoute
   ResearchIdRoute: typeof ResearchIdRoute
+  ApiPublicPushSendRoute: typeof ApiPublicPushSendRoute
 }
 
 declare module '@tanstack/react-router' {
@@ -788,6 +801,13 @@ declare module '@tanstack/react-router' {
       preLoaderRoute: typeof AdminResearchEditIdRouteImport
       parentRoute: typeof AdminResearchRoute
     }
+    '/api/public/push/send': {
+      id: '/api/public/push/send'
+      path: '/api/public/push/send'
+      fullPath: '/api/public/push/send'
+      preLoaderRoute: typeof ApiPublicPushSendRouteImport
+      parentRoute: typeof rootRouteImport
+    }
   }
 }
 
@@ -896,6 +916,7 @@ const rootRouteChildren: RootRouteChildren = {
   CommunityIdRoute: CommunityIdRoute,
   QrRerRoute: QrRerRoute,
   ResearchIdRoute: ResearchIdRoute,
+  ApiPublicPushSendRoute: ApiPublicPushSendRoute,
 }
 export const routeTree = rootRouteImport
   ._addFileChildren(rootRouteChildren)

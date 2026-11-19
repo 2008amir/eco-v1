@@ -10,3 +10,7 @@
 - [x] Add admin user actions: permanently delete account for fresh signup, suspend/return, and ban with distinct sign-in messages.
 - [x] Keep approved members on the profile page after saving profile changes.
 - [x] Place the drawn signature on the ID card so the pad guideline matches the card signature line.
+- [x] Promotion moves the user to the new rank immediately.
+- [x] Live updates across the site and in-app notification toasts.
+- [x] Browser push notifications with profile-menu toggle and allow prompt.
+- [ ] Add VAPID keys on Vercel and redeploy; blocked on the user.

@@ -47,8 +47,10 @@ function UserDetail({ user, onClose }: { user: Row; onClose: () => void }) {
     const { error } = await supabase.rpc("admin_set_position", { _user_id: user.id, _position_id: target });
     setBusy(false);
     if (error) { toast.error(error.message); return; }
-    qc.invalidateQueries({ queryKey: ["ranked-users"] });
-    toast.success("Position updated");
+    await qc.invalidateQueries({ queryKey: ["ranked-users"] });
+    await qc.invalidateQueries({ queryKey: ["admin-users"] });
+    const pos = positions.find((p) => p.id === target);
+    toast.success(pos ? `Promoted to ${pos.name}` : "Position updated");
     onClose();
   };
 

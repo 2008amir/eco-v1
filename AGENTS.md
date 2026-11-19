@@ -4,3 +4,5 @@
 - Keep approved, fully completed registrations on the completed onboarding step even when a client submits stale progress, because payment approval must not reopen registration.
 - Decide onboarding access with isMemberApproved (verified payment, member number, completed step); never send an approved member back to onboarding for later profile edits, because saving the profile must keep them on their profile.
 - Store signatures as the full 3:1 pad frame and place that frame on the ID card so the pad guideline lands on the card signature line, because cropping to the ink loses where the person signed.
+- Send browser push through notifications rows: DB triggers create rows, pg_net calls /api/public/push/send with a DB-held token, and claim_push returns subscriptions, because the hosted site has no service-role key.
+- Keep live updates in the single LiveSync channel in src/lib/live-sync.tsx, which invalidates active queries on any published table change.

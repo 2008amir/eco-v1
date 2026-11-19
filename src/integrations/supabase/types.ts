@@ -400,6 +400,42 @@ export type Database = {
         }
         Relationships: []
       }
+      notifications: {
+        Row: {
+          body: string
+          created_at: string
+          id: string
+          kind: string
+          pushed_at: string | null
+          read_at: string | null
+          title: string
+          url: string
+          user_id: string
+        }
+        Insert: {
+          body?: string
+          created_at?: string
+          id?: string
+          kind: string
+          pushed_at?: string | null
+          read_at?: string | null
+          title: string
+          url?: string
+          user_id: string
+        }
+        Update: {
+          body?: string
+          created_at?: string
+          id?: string
+          kind?: string
+          pushed_at?: string | null
+          read_at?: string | null
+          title?: string
+          url?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       org_policies: {
         Row: {
           content: string
@@ -699,6 +735,51 @@ export type Database = {
           },
         ]
       }
+      push_config: {
+        Row: {
+          endpoint_url: string
+          singleton: boolean
+          token: string
+        }
+        Insert: {
+          endpoint_url: string
+          singleton?: boolean
+          token?: string
+        }
+        Update: {
+          endpoint_url?: string
+          singleton?: boolean
+          token?: string
+        }
+        Relationships: []
+      }
+      push_subscriptions: {
+        Row: {
+          auth: string
+          created_at: string
+          endpoint: string
+          id: string
+          p256dh: string
+          user_id: string
+        }
+        Insert: {
+          auth: string
+          created_at?: string
+          endpoint: string
+          id?: string
+          p256dh: string
+          user_id: string
+        }
+        Update: {
+          auth?: string
+          created_at?: string
+          endpoint?: string
+          id?: string
+          p256dh?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
       research: {
         Row: {
           author_id: string | null
@@ -811,6 +892,11 @@ export type Database = {
         Args: { _revoked: boolean; _user_id: string }
         Returns: undefined
       }
+      claim_push: { Args: { _id: string; _token: string }; Returns: Json }
+      drop_push_subscription: {
+        Args: { _endpoint: string; _token: string }
+        Returns: undefined
+      }
       generate_member_no: { Args: never; Returns: string }
       get_active_history: { Args: { period: string }; Returns: Json }
       get_admin_ids: { Args: never; Returns: string[] }
@@ -848,6 +934,7 @@ export type Database = {
       join_general_community: { Args: { _user_id: string }; Returns: undefined }
       public_member_card: { Args: { _member_no: string }; Returns: Json }
       record_my_activity: { Args: never; Returns: undefined }
+      send_monthly_reminders: { Args: never; Returns: undefined }
       set_community_general: {
         Args: { _community_id: string; _general: boolean }
         Returns: undefined

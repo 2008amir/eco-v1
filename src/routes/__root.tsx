@@ -4,6 +4,7 @@ import { Toaster } from "@/components/ui/sonner";
 import { AuthProvider } from "@/lib/auth-context";
 import { ThemeProvider } from "@/lib/theme-context";
 import { ActivityTracker } from "@/lib/activity-tracker";
+import { LiveSync } from "@/lib/live-sync";
 
 import "../styles.css";
 
@@ -83,6 +84,7 @@ function RootComponent() {
       <ThemeProvider>
         <AuthProvider>
           <ActivityTracker />
+          <LiveSync />
           <Outlet />
           <Toaster richColors position="top-right" />
         </AuthProvider>

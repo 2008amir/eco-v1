@@ -1,5 +1,8 @@
+import { Switch } from "@/components/ui/switch";
+import { Bell } from "lucide-react";
+import { enablePush, disablePush, isPushOn, pushMessage } from "@/lib/push";
 import { useNavigate } from "@tanstack/react-router";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Search, User, LogOut, Sun, Moon, Monitor, Check, Camera, Loader2 } from "lucide-react";
 import { Logo } from "@/components/Logo";
 import { Input } from "@/components/ui/input";
@@ -60,6 +63,24 @@ export function TopBar({ search, onSearchChange, profileTo }: Props) {
     toast.success("Profile picture updated");
   };
 
+  const [pushOn, setPushOn] = useState(false);
+  const [pushBusy, setPushBusy] = useState(false);
+  useEffect(() => { void isPushOn().then(setPushOn); }, []);
+  const togglePush = async (on: boolean) => {
+    if (!user) return;
+    setPushBusy(true);
+    if (on) {
+      const r = await enablePush(user.id);
+      setPushOn(r === "on");
+      (r === "on" ? toast.success : toast.error)(pushMessage(r));
+    } else {
+      await disablePush();
+      setPushOn(false);
+      toast.success("Notifications turned off");
+    }
+    setPushBusy(false);
+  };
+
   return (
     <Sheet open={sidebarOpen} onOpenChange={setSidebarOpen}>
       <header className="sticky top-0 z-30 bg-background border-b border-border">
@@ -101,6 +122,10 @@ export function TopBar({ search, onSearchChange, profileTo }: Props) {
                 {isAdmin && (
                   <DropdownMenuItem onClick={() => navigate({ to: "/admin" as never })}>Admin Panel</DropdownMenuItem>
                 )}
+                <DropdownMenuItem onSelect={(e) => { e.preventDefault(); void togglePush(!pushOn); }} disabled={pushBusy}>
+                  <Bell className="mr-2 h-4 w-4" /> Notifications
+                  <Switch className="ml-auto" checked={pushOn} aria-label="Notifications" />
+                </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuLabel className="text-xs font-normal text-muted-foreground">Appearance</DropdownMenuLabel>
                 {themeOptions.map(({ value, label, icon: Icon }) => (

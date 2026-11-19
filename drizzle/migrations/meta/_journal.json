@@ -106,6 +106,20 @@
       "when": 1795100854928,
       "tag": "0014_shorten_member_number_format",
       "breakpoints": true
+    },
+    {
+      "idx": 15,
+      "version": "7",
+      "when": 1795103239377,
+      "tag": "0015_promotion_live_updates_push_notifications",
+      "breakpoints": true
+    },
+    {
+      "idx": 16,
+      "version": "7",
+      "when": 1795103255726,
+      "tag": "0016_monthly_dues_reminder_schedule",
+      "breakpoints": true
     }
   ]
 }
