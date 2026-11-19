@@ -99,6 +99,13 @@
       "when": 1794950334545,
       "tag": "0013_lock_complete_verified_registration_progress",
       "breakpoints": true
+    },
+    {
+      "idx": 14,
+      "version": "7",
+      "when": 1795100854928,
+      "tag": "0014_shorten_member_number_format",
+      "breakpoints": true
     }
   ]
 }

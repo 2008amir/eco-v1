@@ -38,7 +38,7 @@ const completeProfile = {
   signature_data: "data:image/png;base64,signature",
   policy_accepted_at: "2026-11-17T00:00:00.000Z",
   registered_at: "2026-11-17T00:00:00.000Z",
-  member_no: "EMS/AB12/CD34",
+  member_no: "EMS/AB1/CDE",
   registration_payment_verified: true,
   onboarding_step: 1,
 } as unknown as Profile;
