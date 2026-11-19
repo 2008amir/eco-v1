@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { isRegistrationComplete, isRegistrationFormComplete } from "./registration";
+import { isMemberApproved, isRegistrationComplete, isRegistrationFormComplete, missingMemberFields } from "./registration";
 import type { Profile } from "./auth-context";
 
 const completeProfile = {
@@ -71,5 +71,39 @@ describe("isRegistrationComplete", () => {
     const incomplete = profileWith({ gender: undefined, registration_payment_verified: true });
     expect(isRegistrationFormComplete(incomplete)).toBe(false);
     expect(isRegistrationComplete(incomplete)).toBe(false);
+  });
+});
+describe("isMemberApproved", () => {
+  const approved = profileWith({ onboarding_step: 6 });
+
+  it("keeps an approved member out of onboarding even if a profile detail is later blank", () => {
+    expect(isMemberApproved(profileWith({ onboarding_step: 6, gender: null }))).toBe(true);
+  });
+
+  it("does not approve anyone whose payment the administrator has not verified", () => {
+    expect(isMemberApproved({ ...approved, registration_payment_verified: false })).toBe(false);
+  });
+
+  it("does not approve anyone without an issued ID number", () => {
+    expect(isMemberApproved({ ...approved, member_no: null })).toBe(false);
+  });
+
+  it("does not approve a member still on an earlier registration step", () => {
+    expect(isMemberApproved({ ...approved, onboarding_step: 3 })).toBe(false);
+  });
+});
+
+describe("missingMemberFields", () => {
+  it("only lets last name and address lines 2 and 3 stay empty", () => {
+    const form = { first_name: "A", middle_name: "", last_name: "", address_line2: "", address_line3: "", is_graduate: "no", school_level: "" };
+    const missing = missingMemberFields(form, "sig");
+    expect(missing).toContain("Middle name");
+    expect(missing).toContain("Level in school");
+    expect(missing).not.toContain("Last name");
+    expect(missing).not.toContain("First name");
+  });
+
+  it("requires a signature", () => {
+    expect(missingMemberFields({}, null)).toContain("Signature");
   });
 });

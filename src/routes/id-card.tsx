@@ -8,7 +8,7 @@ import { useAuth } from "@/lib/auth-context";
 import { usePositions } from "@/lib/membership";
 import { usePolicyText } from "@/lib/org-policy";
 import { useStorageUrl } from "@/lib/storage-url";
-import { qrDataUrl, qrUrlFor, signatureInkDataUrl, toDataUrl, downloadFormPdf, downloadIdCardPdf, buildFormPdfBytes } from "@/lib/member-card";
+import { qrDataUrl, qrUrlFor, signatureFrameDataUrl, toDataUrl, downloadFormPdf, downloadIdCardPdf, buildFormPdfBytes } from "@/lib/member-card";
 import { Download, Loader2, Printer } from "lucide-react";
 import { toast } from "sonner";
 import { Checkbox } from "@/components/ui/checkbox";
@@ -55,7 +55,7 @@ function IdCardPage() {
 
   useEffect(() => { qrDataUrl(memberNo).then(setQr).catch(() => setQr(null)); }, [memberNo]);
   useEffect(() => {
-    signatureInkDataUrl(profile?.signature_data).then(setSignature).catch(() => setSignature(profile?.signature_data ?? null));
+    signatureFrameDataUrl(profile?.signature_data).then(setSignature).catch(() => setSignature(profile?.signature_data ?? null));
   }, [profile?.signature_data]);
 
   const base = { profile: (profile ?? null) as Record<string, any> | null, email: user?.email ?? "", positionName, memberNo };

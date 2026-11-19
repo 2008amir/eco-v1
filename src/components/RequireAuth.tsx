@@ -4,12 +4,13 @@ import { useAuth } from "@/lib/auth-context";
 import { AuthScreen } from "@/components/AuthScreen";
 import { AlertTriangle, Loader2, RefreshCcw } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { isRegistrationComplete } from "@/lib/registration";
+import { isMemberApproved } from "@/lib/registration";
 
 export function RequireAuth({ children, requireAdmin = false, skipOnboarding = false }: { children: ReactNode; requireAdmin?: boolean; skipOnboarding?: boolean }) {
   const { user, profile, isAdmin, rolesLoaded, rolesError, loading, refreshProfile } = useAuth();
   const navigate = useNavigate();
-  const onboardingDone = isAdmin || isRegistrationComplete(profile);
+  // Approved members stay out of registration for good, even while editing their profile.
+  const onboardingDone = isAdmin || isMemberApproved(profile);
 
   useEffect(() => {
     if (loading || (user && !rolesLoaded)) return;

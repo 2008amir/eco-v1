@@ -14,6 +14,7 @@ import { PasswordInput } from "@/components/PasswordInput";
 import { MemberForm, EMPTY_MEMBER_FORM, buildProfilePayload, Section, Field, type FormState } from "@/components/MemberForm";
 import { PositionActivation } from "@/components/PositionActivation";
 import { usePositions } from "@/lib/membership";
+import { missingMemberFields } from "@/lib/registration";
 
 export const Route = createFileRoute("/profile")({
   component: () => <RequireAuth><ProfilePage /></RequireAuth>,
@@ -88,6 +89,11 @@ function ProfilePage() {
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!user) return;
+    const missing = missingMemberFields(form, signature);
+    if (missing.length > 0) {
+      toast.error(`Please fill in: ${missing.join(", ")}`);
+      return;
+    }
     setSaving(true);
     try {
       const payload = { ...buildProfilePayload(form, signature), avatar_url: form.avatar_url };

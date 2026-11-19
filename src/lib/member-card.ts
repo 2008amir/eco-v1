@@ -58,6 +58,39 @@ export async function toDataUrl(url: string | null | undefined): Promise<string 
   }
 }
 
+/**
+ * Keep the whole signature pad frame (3:1) and only make the white background
+ * transparent, so the pad's guideline (2/3 down, 5% side insets) can be laid
+ * exactly onto the ID card's signature line.
+ */
+export async function signatureFrameDataUrl(source: string | null | undefined): Promise<string | null> {
+  if (!source) return null;
+  return await new Promise<string | null>((resolve) => {
+    const image = new Image();
+    image.onload = () => {
+      const canvas = document.createElement("canvas");
+      canvas.width = image.naturalWidth;
+      canvas.height = image.naturalHeight;
+      const context = canvas.getContext("2d", { willReadFrequently: true });
+      if (!context) { resolve(source); return; }
+      context.drawImage(image, 0, 0);
+      const pixels = context.getImageData(0, 0, canvas.width, canvas.height);
+      let ink = false;
+      for (let i = 0; i < pixels.data.length; i += 4) {
+        const alpha = pixels.data[i + 3] ?? 0;
+        if (alpha < 16 || ((pixels.data[i] ?? 255) > 242 && (pixels.data[i + 1] ?? 255) > 242 && (pixels.data[i + 2] ?? 255) > 242)) {
+          pixels.data[i + 3] = 0;
+        } else ink = true;
+      }
+      if (!ink) { resolve(null); return; }
+      context.putImageData(pixels, 0, 0);
+      resolve(canvas.toDataURL("image/png"));
+    };
+    image.onerror = () => resolve(source);
+    image.src = source;
+  });
+}
+
 /** Remove white/transparent margins so only the handwritten signature is rendered. */
 export async function signatureInkDataUrl(source: string | null | undefined): Promise<string | null> {
   if (!source) return null;
@@ -258,9 +291,10 @@ export async function downloadIdCardPdf({ profile, positionName, memberNo, qr, a
   doc.addImage(qr, "PNG", 5.0, 39.0, 11.2, 11.2);
   doc.setTextColor(8, 15, 13); doc.setFont("helvetica", "bold"); doc.setFontSize(4.8);
   doc.text("SCAN FOR", 18.1, 43.6); doc.text("VERIFICATION", 18.1, 47.3);
-  const signature = await signatureInkDataUrl(p.signature_data ? String(p.signature_data) : null);
+  const signature = await signatureFrameDataUrl(p.signature_data ? String(p.signature_data) : null);
   if (signature) {
-    try { doc.addImage(signature, "PNG", 49.2, H * 0.895 - 9.1, 32.5, 9.1); } catch { /* use name below */ }
+    try { // Same frame as the on-screen card: pad guideline lands on the card signature line (89.56% down).
+    doc.addImage(signature, "PNG", 47.39, 40.14, 36.95, 12.32); } catch { /* use name below */ }
   } else {
     doc.setFont("times", "italic"); doc.setFontSize(8); doc.text(String(fullName || "Signature").slice(0, 28), 65.5, 47.5, { align: "center" });
   }

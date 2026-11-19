@@ -8,3 +8,5 @@
 - [x] Show PDF pages directly in the form preview on mobile.
 - [x] Keep every non-admin in registration/payment review until form is complete and admin verifies payment, including after returning.
 - [x] Add admin user actions: permanently delete account for fresh signup, suspend/return, and ban with distinct sign-in messages.
+- [x] Keep approved members on the profile page after saving profile changes.
+- [x] Place the drawn signature on the ID card so the pad guideline matches the card signature line.

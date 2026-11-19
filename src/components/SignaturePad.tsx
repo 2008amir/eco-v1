@@ -76,7 +76,7 @@ export function SignaturePad({ value, onChange }: Props) {
 
   return (
     <div className="space-y-2">
-      <div className="relative h-40 overflow-hidden rounded-lg border border-border bg-white">
+      <div className="relative aspect-[3/1] w-full overflow-hidden rounded-lg border border-border bg-white">
         <div className="pointer-events-none absolute inset-x-[5%] top-2/3 border-t border-dashed border-muted-foreground/50" />
         <canvas
           ref={canvasRef}

@@ -2,3 +2,5 @@
 - Gate member pages on persisted, complete registration and administrator-approved payment; never infer approval from local state, because returning users must resume the saved flow securely.
 - Manage account suspension and bans in a protected administrator database function; delete auth identities only from an authenticated, role-checked server function so the same email can register afresh.
 - Keep approved, fully completed registrations on the completed onboarding step even when a client submits stale progress, because payment approval must not reopen registration.
+- Decide onboarding access with isMemberApproved (verified payment, member number, completed step); never send an approved member back to onboarding for later profile edits, because saving the profile must keep them on their profile.
+- Store signatures as the full 3:1 pad frame and place that frame on the ID card so the pad guideline lands on the card signature line, because cropping to the ink loses where the person signed.
